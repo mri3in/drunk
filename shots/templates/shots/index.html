@@ -1,0 +1,60 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" >
+  <head>
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <link href="{% static 'drunk/style.css' %}" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+    <title>Drunk</title>
+  </head>
+  <body>
+    <div id="app" > </div>
+    <div id="wrapper_login" class="container-fluid row">
+      <div id="login" class="col-lg-12 col-md-12 col-xs-12"> </div>
+    </div>
+
+    <script type="text/babel" >
+
+      class App extends React.Component {
+
+        constructor(props){
+            super(props);
+            this.state = {
+
+            };
+        }
+
+        render() {
+          return (
+            <div>
+
+            </div>
+          );
+        }
+      }
+
+      class Login extends React.Component {
+        render() {
+          return (
+            <div>
+              <img id="img_404" src="{% static 'assets/404 BTN.png' %}" />
+              <img id="img_hiclipart" src="{% static 'assets/hiclipart.png' %}" />
+            </div>
+          );
+        }
+      }
+
+      ReactDOM.render(<Login />, document.querySelector("#login"));
+
+    </script>
+  </body>
+</html>
