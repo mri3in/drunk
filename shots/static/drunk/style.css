@@ -16,16 +16,17 @@
 #img_404 {
   margin-left: auto;
   margin-right: auto;
-  width: 100%;
   display: block;
 }
 
 #img_hiclipart {
-  /* position: absolute; */
+  position: absolute;
   width: 650px;
   height: 650px;
   margin-left: auto;
   margin-right: auto;
+  left: 0;
+  right: 0;
   bottom: 0px;
   opacity: 0.5;
   filter: blur(5px);

@@ -1,4 +1,4 @@
-{% load static %}
+<!-- {% load static %} -->
 
 <!DOCTYPE html>
 <html lang="en" >
@@ -46,8 +46,9 @@
         render() {
           return (
             <div>
-              <img id="img_404" src="{% static 'assets/404 BTN.png' %}" />
-              <img id="img_hiclipart" src="{% static 'assets/hiclipart.png' %}" />
+              <img id="img_404" src="../../static/assets/404 BTN.png" />
+              <img id="img_hiclipart" src="../../static/assets/hiclipart.png" />
+
             </div>
           );
         }
@@ -56,5 +57,9 @@
       ReactDOM.render(<Login />, document.querySelector("#login"));
 
     </script>
+    <!-- reserve for django
+    <img id="img_404" src="{% static 'assets/404 BTN.png' %}" />
+    <img id="img_hiclipart" src="{% static 'assets/hiclipart.png' %}" />
+    -->
   </body>
 </html>
