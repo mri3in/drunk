@@ -5,8 +5,8 @@
     <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    <link href="{% static 'drunk/style.css' %}" rel="stylesheet">
-    <!-- <link href="../../static/drunk/style.css" rel="stylesheet"> -->
+    <!-- <link href="{% static 'drunk/style.css' %}" rel="stylesheet"> -->
+    <link href="../../static/drunk/style.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
@@ -30,10 +30,28 @@
     <div class="clearfix"></div>
     <div class="col-lg-3"></div>
     <form class="col-lg-6">
-      {{ participants }}
-      {% for participant in participants %}
-        <span>{{ participant.name }} </span>
-      {% endfor %}
+      <div id="participantList" class="form-group">
+        <div>
+          <label>Phong</label>
+          <input type="text" name="participant" class="form-control">
+        </div>
+      </div>
+      <div id="totalAmount" class="form-group">
+        <label>Total: </label>
+        <input type="text" name="totalAmount" class="form-control">
+      </div>
+      <div id="payee" class="form-group">
+        <label>Payee: </label>
+        <select id="participantListForPayment" name="payee" class="form-control">
+          <option value="P1">P1</option>
+          <option value="P2">P2</option>
+          <option value="P3">P3</option>
+        </select>
+      </div>
+      <div id="note" class="form-group" >
+        <label>Note: </label>
+        <input type="text" name="note" class="form-control">
+      </div>
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 
