@@ -14,7 +14,44 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <title>Drunk</title>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.quantity-left-minus').forEach(button => {
+          var inputId = button.dataset.field;
+          console.log(inputId);
+          button.onclick = function () {
+            var quantity = parseInt($("#"+inputId).val());
+            console.log(parseInt($("#"+inputId).val()));
+            if( quantity > 0 ) {
+              $("#"+inputId).val(quantity - 1);
+            }
+            if($("#"+inputId).val() == 0){
+              button.disabled = true;
+            }
+          }
+        });
+        document.querySelectorAll('.quantity-right-plus').forEach(button => {
+          var inputId = button.dataset.field;
+          button.onclick = function () {
+            var quantity = parseInt($("#"+inputId).val());
+            $("#"+inputId).val(quantity + 1);
+            if($("#"+inputId).val() > 0){
+              var buttons = document.querySelectorAll('[data-field="'+inputId+'"]');
+              for (i = 0; i < buttons.length; ++i) {
+                if(buttons[i].classList.contains('quantity-left-minus')){
+                  if(buttons[i].disabled == true){
+                    buttons[i].disabled = false;
+                  }
+                }
+              }
+            }
+          }
+        });
+      });
+
+    </script>
   </head>
   <body>
     <div class="col-lg-3"></div>
@@ -30,10 +67,33 @@
     <div class="clearfix"></div>
     <div class="col-lg-3"></div>
     <form class="col-lg-6">
-      {{ participants }}
+      <!-- {{ participants }} -->
       {% for participant in participants %}
-        <span>{{ participant.name }} </span>
+      <div class="clearfix"></div>
+        <div>
+          <div class="col-lg-4">
+            <span>{{ participant.name }} </span>
+          </div>
+          <div class="col-lg-4">
+            <div class="input-group">
+              <span class="input-group-btn">
+                <button type="button" class="quantity-left-minus btn btn-danger btn-number"  data-type="minus" data-field="{{ participant.name }}-quantity">
+                  <span class="glyphicon glyphicon-minus"></span>
+                </button>
+              </span>
+              <input type="text" id="{{ participant.name }}-quantity" name="quantity" class="form-control input-number" value="10" min="1" max="100">
+              <span class="input-group-btn">
+                <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="{{ participant.name }}-quantity">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+
       {% endfor %}
+      <div class="clearfix"></div>
+
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 
