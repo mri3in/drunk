@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" >
+  <head>
+    <title>Test</title>
+  </head>
+
+  <body>
+    <p>participants: {{participants}}</p>
+    <br/><br/>
+    <p>quantities: {{quantities}}</p>
+    <br/>
+    <p>{{quantities.0}}</p>
+    <div>
+      {% for p, q in list %}
+        <label>{{p}}: </label>
+
+        <span>{{q}}</span>
+        <hr>
+      {% endfor %}
+    </div>
+    <a href="{% url 'shots:index' %}">Index</a>
+  </body>
+</html>

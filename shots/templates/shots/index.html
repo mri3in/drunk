@@ -56,44 +56,65 @@
   <body>
     <div class="col-lg-3"></div>
     <div class="col-lg-6">
-      <div class="col-lg-1">
-        <select id="eventList">
-          <option value="Event1">Event1</option>
-          <option value="Event2">Event2</option>
-          <option value="Event3">Event3</option>
+      <div class="col-lg-5">
+        <select id="eventList" class="form-control">
+          {% for event in events %}
+            {% if event == lastEvent %}
+              <option value="{{ event.id }}" selected>{{ event.name }}</option>
+            {% else %}
+              <option value="{{ event.id }}">{{ event.name }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-lg-5">
+        <select id="roundList" class="form-control">
+          {% for round in rounds %}
+            {% if round == lastRound %}
+              <option value="{{ round.id }}" selected>{{ round.id }}</option>
+            {% else %}
+              <option value="{{ round.id }}">{{ round.id }}</option>
+            {% endif %}
+          {% endfor %}
         </select>
       </div>
     </div>
     <div class="clearfix"></div>
     <div class="col-lg-3"></div>
-    <form class="col-lg-6">
-      <!-- {{ participants }} -->
+    <form class="col-lg-6" id="form_event" action="{% url 'shots:addRound' %}" method="post">
+      {% csrf_token %}
       {% for participant in participants %}
-      <div class="clearfix"></div>
-        <div>
-          <div class="col-lg-4">
-            <span>{{ participant.name }} </span>
-          </div>
-          <div class="col-lg-4">
-            <div class="input-group">
-              <span class="input-group-btn">
-                <button type="button" class="quantity-left-minus btn btn-danger btn-number"  data-type="minus" data-field="{{ participant.name }}-quantity">
-                  <span class="glyphicon glyphicon-minus"></span>
-                </button>
-              </span>
-              <input type="text" id="{{ participant.name }}-quantity" name="quantity" class="form-control input-number" value="10" min="1" max="100">
-              <span class="input-group-btn">
-                <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="{{ participant.name }}-quantity">
-                    <span class="glyphicon glyphicon-plus"></span>
-                </button>
-              </span>
-            </div>
+        <div class="form-group">
+          <label>{{ participant.name }} </label>
+          <div class="input-group">
+            <span class="input-group-btn">
+              <button type="button" class="quantity-left-minus btn btn-danger btn-number"  data-type="minus" data-field="{{ participant.name }}-quantity">
+                <span class="glyphicon glyphicon-minus"></span>
+              </button>
+            </span>
+            <input type="hidden" name="participant" value="{{ participant.id }}">
+            <input type="text" name="quantity-{{ participant.id }}" class="form-control input-number" value="10" min="1" max="100">
+            <span class="input-group-btn">
+              <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="{{ participant.name }}-quantity">
+                  <span class="glyphicon glyphicon-plus"></span>
+              </button>
+            </span>
           </div>
         </div>
-
+        <div class="clearfix"></div>
       {% endfor %}
       <div class="clearfix"></div>
-
+      <div class="form-group">
+        <label>Total </label>
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="500" >
+          <span class="input-group-addon">,000</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Note </label>
+        <input type="text" class="form-control" placeholder="Note" >
+      </div>
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 
