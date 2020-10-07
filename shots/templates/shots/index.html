@@ -8,13 +8,14 @@
     <link href="{% static 'drunk/style.css' %}" rel="stylesheet">
     <!-- <link href="../../static/drunk/style.css" rel="stylesheet"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
     <title>Drunk</title>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
@@ -32,6 +33,7 @@
             }
           }
         });
+
         document.querySelectorAll('.quantity-right-plus').forEach(button => {
           var inputId = button.dataset.field;
           button.onclick = function () {
@@ -49,40 +51,56 @@
             }
           }
         });
+
+        // assign value to a hidden field on add participant modal
+        $('#participant-round-id').val($('#roundList').val());
+
+        // on the change of the round, change the value accordingly
+        $('#roundList').change(function() {
+          $('#participant-round-id').val($(this).val());
+        });
+
       });
 
     </script>
   </head>
   <body>
-    <div class="col-lg-3"></div>
-    <div class="col-lg-6">
-      <div class="col-lg-5">
-        <select id="eventList" class="form-control">
-          {% for event in events %}
-            {% if event == lastEvent %}
-              <option value="{{ event.id }}" selected>{{ event.name }}</option>
-            {% else %}
-              <option value="{{ event.id }}">{{ event.name }}</option>
-            {% endif %}
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-lg-5">
-        <select id="roundList" class="form-control">
-          {% for round in rounds %}
-            {% if round == lastRound %}
-              <option value="{{ round.id }}" selected>{{ round.id }}</option>
-            {% else %}
-              <option value="{{ round.id }}">{{ round.id }}</option>
-            {% endif %}
-          {% endfor %}
-        </select>
-      </div>
-    </div>
     <div class="clearfix"></div>
     <div class="col-lg-3"></div>
     <form class="col-lg-6" id="form_event" action="{% url 'shots:addRound' %}" method="post">
       {% csrf_token %}
+      <div class="col-lg-12">
+        <div class="col-lg-5">
+          <select id="eventList" class="form-control" name="event">
+            {% for event in events %}
+              {% if event == lastEvent %}
+                <option value="{{ event.id }}" selected>{{ event.name }}</option>
+              {% else %}
+                <option value="{{ event.id }}">{{ event.name }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-2">
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+            Add Event
+          </button>
+
+        </div>
+        <div class="col-lg-5">
+          <select id="roundList" class="form-control" name="round">
+            <option value=0> + New Round</option>
+            {% for round in rounds %}
+              {% if round == lastRound %}
+                <option value="{{ round.id }}" selected>{{ round.order }}</option>
+              {% else %}
+                <option value="{{ round.id }}">{{ round.order }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="clearfix"></div>
       {% for participant in participants %}
         <div class="form-group">
           <label>{{ participant.name }} </label>
@@ -93,7 +111,7 @@
               </button>
             </span>
             <input type="hidden" name="participant" value="{{ participant.id }}">
-            <input type="text" name="quantity-{{ participant.id }}" class="form-control input-number" value="10" min="1" max="100">
+            <input type="text" id="{{ participant.name }}-quantity" name="quantity-{{ participant.id }}" class="form-control input-number" value="10" min="1" max="100">
             <span class="input-group-btn">
               <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="{{ participant.name }}-quantity">
                   <span class="glyphicon glyphicon-plus"></span>
@@ -103,20 +121,85 @@
         </div>
         <div class="clearfix"></div>
       {% endfor %}
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#AddParticipantModal">
+        Add Participant
+      </button>
       <div class="clearfix"></div>
+      <div class="form-group">
+        <select id="payeeList" class="form-control" name="payee">
+          {% for participant in participants %}
+            <option value="{{ participant.id }}">{{ participant.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
       <div class="form-group">
         <label>Total </label>
         <div class="input-group">
-          <input type="text" class="form-control" placeholder="500" >
+          <input type="text" class="form-control" placeholder="500" name="total">
           <span class="input-group-addon">,000</span>
         </div>
       </div>
       <div class="form-group">
         <label>Note </label>
-        <input type="text" class="form-control" placeholder="Note" >
+        <input type="text" class="form-control" placeholder="Note" name="note">
       </div>
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 
+    <!-- Modals start here -->
+    <!-- Add Event Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+          </div>
+          <form action="{% url 'shots:addEvent' %}" method="post">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                  <label for="event-name" class="control-label">Event:</label>
+                  <input type="text" class="form-control" id="event-name" name="event-name">
+                  <p style="font-style: italic"> Leave blank to use today as the event name.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- Add Participant Modal -->
+    <div class="modal fade" id="AddParticipantModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+          </div>
+          <form action="{% url 'shots:addParticipant' %}" method="post">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                  <label for="participant-name" class="control-label">Name:</label>
+                  <input type="text" class="form-control" id="participant-name" name="participant-name" required>
+                  <label for="participant-nickname" class="control-label">Nickname:</label>
+                  <input type="text" class="form-control" id="participant-nickname" name="participant-nickname">
+                  <label for="participant-type" class="control-label">Frequent Member?:</label>
+                  <input type="checkbox" id="participant-type" name="participant-type" value="True">
+                  <input type="text" hidden id="participant-round-id" name="round-id" value="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </body>
   </html>

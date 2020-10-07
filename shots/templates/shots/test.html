@@ -5,16 +5,25 @@
   </head>
 
   <body>
-    <p>participants: {{participants}}</p>
+    <!-- <p>participants: {{participants}}</p>
     <br/><br/>
     <p>quantities: {{quantities}}</p>
-    <br/>
-    <p>{{quantities.0}}</p>
+    <br/> -->
+    <p>{{list}}</p>
     <div>
-      {% for p, q in list %}
-        <label>{{p}}: </label>
+      {% for p1, q1 in list %}
+        <div>participant: {{p1}}</div>
 
-        <span>{{q}}</span>
+        <div>quantity: {{q1}}</div>
+        <hr>
+      {% endfor %}
+    </div>
+    <hr>
+    <div>rp List start here</div>
+    <div>
+      {% for rp in rpList %}
+        <div>rp: {{rp}}</div>
+
         <hr>
       {% endfor %}
     </div>
