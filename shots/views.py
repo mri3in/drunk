@@ -3,6 +3,7 @@ from .models import *
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from datetime import date
+from django.http import HttpResponse
 
 
 # Create your views here.
@@ -65,12 +66,13 @@ def addRound(request):
             rpList.append(rp)
             rp.save()
         # print(f"list: {listZip}")
-        return render(request, 'shots/test.html', {
-            "participants":participants,
-            "quantities":quantities,
-            "list": listZip,
-            "rpList": rpList
-        })
+        # return render(request, 'shots/test.html', {
+        #     "participants":participants,
+        #     "quantities":quantities,
+        #     "list": listZip,
+        #     "rpList": rpList
+        # })
+        return HttpResponseRedirect(reverse("shots:index"))
 
 
 def addEvent(request):
@@ -102,3 +104,92 @@ def addParticipant(request):
         rp = RoundParticipant(round=r, participant=p, quantity=0)
         rp.save()
         return HttpResponseRedirect(reverse("shots:index"))
+
+
+def calculateBalance(event_id):
+    e = Event.objects.get(id=event_id)
+    if e:
+        rounds = e.rounds.all()
+        totalCost = 0
+        totalQuantity = 0
+        unitPrice = 0
+        participantQuantity = {}
+        participantCost = {}
+        participantExpense = {}
+        participantBalance = {}
+
+        for round in rounds:
+            if round.total:
+                totalCost += round.total
+            rpList = RoundParticipant.objects.filter(round = round.id)
+            if round.payee:
+                payee = round.payee.id
+                if str(payee) in participantExpense:
+                    participantExpense[str(payee)] = int(participantExpense[str(payee)]) + round.total
+                else:
+                    participantExpense[str(payee)] = round.total
+            for rp in rpList:
+                totalQuantity += rp.quantity
+                p = rp.participant.id
+                if str(p) in participantQuantity:
+                    participantQuantity[str(p)] = int(participantQuantity[str(p)]) + rp.quantity
+                else:
+                    participantQuantity[str(p)] = rp.quantity
+        if totalQuantity != 0:
+            unitPrice = totalCost / totalQuantity
+
+        for p, q in participantQuantity.items():
+            participantCost[str(p)] = int(q) * unitPrice
+
+        for p in participantExpense:
+            b = int(participantExpense[str(p)]) - int(participantCost[str(p)])
+            participantBalance[str(p)] = b
+
+        return participantQuantity, participantCost, participantExpense, participantBalance, totalCost
+
+
+def dashboard(request, eventId):
+    events = Event.objects.order_by('-id')
+    participantQuantity, participantCost, participantExpense, participantBalance, totalCost = calculateBalance(eventId)
+    participants = []
+    for key in participantQuantity:
+        p = Participant.objects.get(pk=int(key))
+        participants.append(p)
+    print(events)
+    return render(request, 'shots/dashboard.html', {
+        "eventId": eventId,
+        "events": events,
+        "participantQuantity": participantQuantity,
+        "participantCost": participantCost,
+        "participantExpense": participantExpense,
+        "participants": participants,
+        "participantBalance": participantBalance,
+        "totalCost": totalCost
+    })
+
+
+def dashboard_table(request, eventId):
+    participantQuantity, participantCost, participantExpense, participantBalance, totalCost = calculateBalance(eventId)
+    participants = []
+    expense = ''
+    cost = ''
+    balance = ''
+
+    for key in participantQuantity:
+        p = Participant.objects.get(pk=int(key))
+        participants.append(p)
+    # print(participants)
+    htmlResponse = ''
+
+    for p in participants:
+        if str(p.id) in participantExpense:
+            expense = str(participantExpense[str(p.id)])
+        if str(p.id) in participantCost:
+            cost = str(participantCost[str(p.id)])
+        if str(p.id) in participantBalance:
+            balance = str(participantBalance[str(p.id)])
+
+        html = '<tr><td name="name">' + p.name + '</td><td name="expense">' + expense + '</td><td name="cost">' + cost + '</td><td name="balance">' + balance + '</td></tr>'
+        htmlResponse += html
+        print(htmlResponse)
+    return HttpResponse(htmlResponse)
