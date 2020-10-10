@@ -3,12 +3,14 @@ from .models import *
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from datetime import date
-from django.http import HttpResponse
-
+from django.http import HttpResponse, JsonResponse
 
 # Create your views here.
-def index(request):
-    lastEvent = Event.objects.order_by('id')[0]
+def index(request, **kwarg):
+    if kwarg:
+        lastEvent = Event.objects.get(pk=int(kwarg['eventId']))
+    else:
+        lastEvent = Event.objects.order_by('id')[0]
     events = Event.objects.order_by('-date')
     rounds = lastEvent.rounds.order_by('-datetime')
     participants = []
@@ -141,8 +143,11 @@ def calculateBalance(event_id):
         for p, q in participantQuantity.items():
             participantCost[str(p)] = int(q) * unitPrice
 
-        for p in participantExpense:
-            b = int(participantExpense[str(p)]) - int(participantCost[str(p)])
+        for p in participantCost:
+            if str(p) in participantExpense:
+                b = float(participantExpense[str(p)]) - float(participantCost[str(p)])
+            else:
+                b = 0 - float(participantCost[str(p)])
             participantBalance[str(p)] = b
 
         return participantQuantity, participantCost, participantExpense, participantBalance, totalCost
@@ -155,7 +160,6 @@ def dashboard(request, eventId):
     for key in participantQuantity:
         p = Participant.objects.get(pk=int(key))
         participants.append(p)
-    print(events)
     return render(request, 'shots/dashboard.html', {
         "eventId": eventId,
         "events": events,
@@ -171,9 +175,6 @@ def dashboard(request, eventId):
 def dashboard_table(request, eventId):
     participantQuantity, participantCost, participantExpense, participantBalance, totalCost = calculateBalance(eventId)
     participants = []
-    expense = ''
-    cost = ''
-    balance = ''
 
     for key in participantQuantity:
         p = Participant.objects.get(pk=int(key))
@@ -182,14 +183,30 @@ def dashboard_table(request, eventId):
     htmlResponse = ''
 
     for p in participants:
+        expense = 0
+        cost = 0
+        balance = 0
         if str(p.id) in participantExpense:
-            expense = str(participantExpense[str(p.id)])
+            expense = participantExpense[str(p.id)]
+            # print(f"payee id : {p.id}, expense : {expense}")
         if str(p.id) in participantCost:
-            cost = str(participantCost[str(p.id)])
+            cost = participantCost[str(p.id)]
         if str(p.id) in participantBalance:
-            balance = str(participantBalance[str(p.id)])
+            balance = participantBalance[str(p.id)]
 
-        html = '<tr><td name="name">' + p.name + '</td><td name="expense">' + expense + '</td><td name="cost">' + cost + '</td><td name="balance">' + balance + '</td></tr>'
+        html = '<tr><td name="name">' + p.name + '</td>'
+        html += '<td name="expense">' + str(expense) + '</td>'
+        html += '<td name="cost">' + str("{:.2f}".format(cost)) + '</td>'
+        if int(balance) > 0:
+            html += '<td name="balance" class="positive-balance">' + str("{:.2f}".format(balance)) + '</td></tr>'
+        elif int(balance) < 0:
+            html += '<td name="balance" class="negative-balance">' + str("{:.2f}".format(balance)) + '</td></tr>'
+        else:
+            html += '<td name="balance">' + str("{:.2f}".format(balance)) + '</td></tr>'
         htmlResponse += html
-        print(htmlResponse)
-    return HttpResponse(htmlResponse)
+
+    response = {
+        'response': htmlResponse,
+        'totalCost' : totalCost
+    }
+    return JsonResponse(response)

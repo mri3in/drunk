@@ -83,3 +83,17 @@ body {
   text-align: center;
   color: rgba(163, 38, 102, 1)
 }
+
+
+.positive-balance {
+  color: rgba(86, 140, 81, 1)
+}
+
+.negative-balance {
+  color: rgba(243, 67, 69, 1)
+}
+
+.header {
+  height: 10%;
+  width: 100%
+}

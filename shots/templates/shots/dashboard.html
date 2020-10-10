@@ -61,16 +61,21 @@
         $('#roundList').change(function() {
           $('#participant-round-id').val($(this).val());
         });
+
+        // changing an event would change the dashboard
         $('#event').change(function() {showDashboard($(this).val())});
+
+        // color the balance
 
       });
       function showDashboard(eventId) {
         fetch(`../dashboard_table/${eventId}`)
-        .then(response => response.text())
-        .then(text => {
-          console.log(text);
+        .then(response => response.json())
+        .then(data => {
           $('#dashboard-tbody-view').empty();
-          $('#dashboard-tbody-view').append(text)
+          $('#dashboard-tbody-view').append(data.response);
+          $('#total-cost').empty();
+          $('#total-cost').html('Total Payment: ' + data.totalCost);
         })
       };
 
@@ -78,6 +83,7 @@
     </script>
   </head>
   <body>
+    <div class="header">&nbsp;</div>
     <div class="col-lg-3"></div>
     <div class="col-lg-6">
       <select id="event" name="event"= style="width: 100%">
@@ -110,63 +116,12 @@
     <div class="col-lg-3"></div>
     <div class="col-lg-6">
       {% if totalCost != 0 %}
-        <p class="total-cost">Total Payment: {{totalCost}}</p>
+        <p class="total-cost" id="total-cost">Total Payment: {{totalCost}}</p>
       {% endif %}
+      <a id="new-round-button" class="btn btn-primary" href="{% url 'shots:index' %}{{eventId}}">
+        New Round
+      </a>
     </div>
-    <!-- Modals start here -->
-    <!-- Add Event Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-          </div>
-          <form action="{% url 'shots:addEvent' %}" method="post">
-            {% csrf_token %}
-            <div class="modal-body">
-                <div class="form-group">
-                  <label for="event-name" class="control-label">Event:</label>
-                  <input type="text" class="form-control" id="event-name" name="event-name">
-                  <p style="font-style: italic"> Leave blank to use today as the event name.</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Save changes</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-    <!-- Add Participant Modal -->
-    <div class="modal fade" id="AddParticipantModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-          </div>
-          <form action="{% url 'shots:addParticipant' %}" method="post">
-            {% csrf_token %}
-            <div class="modal-body">
-                <div class="form-group">
-                  <label for="participant-name" class="control-label">Name:</label>
-                  <input type="text" class="form-control" id="participant-name" name="participant-name" required>
-                  <label for="participant-nickname" class="control-label">Nickname:</label>
-                  <input type="text" class="form-control" id="participant-nickname" name="participant-nickname">
-                  <label for="participant-type" class="control-label">Frequent Member?:</label>
-                  <input type="checkbox" id="participant-type" name="participant-type" value="True">
-                  <input type="text" hidden id="participant-round-id" name="round-id" value="1">
-                </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Save changes</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+
   </body>
-  </html>
+</html>

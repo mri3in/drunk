@@ -4,6 +4,7 @@ from . import views
 app_name = "shots"
 urlpatterns = [
     path('', views.index, name="index"),
+    path('<int:eventId>', views.index, name="index_shot"),
     path("addRound", views.addRound, name="addRound"),
     path("addEvent", views.addEvent, name="addEvent"),
     path("addParticipant", views.addParticipant, name="addParticipant"),
