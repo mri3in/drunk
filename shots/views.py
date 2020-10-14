@@ -10,9 +10,9 @@ def index(request, **kwarg):
     if kwarg:
         lastEvent = Event.objects.get(pk=int(kwarg['eventId']))
     else:
-        lastEvent = Event.objects.order_by('id')[0]
-    events = Event.objects.order_by('-date')
-    rounds = lastEvent.rounds.order_by('-datetime')
+        lastEvent = Event.objects.order_by('-id')[0]
+    events = Event.objects.order_by('-id')
+    rounds = lastEvent.rounds.order_by('-order')
     participants = []
     lastRound = ""
     if rounds:
@@ -25,6 +25,10 @@ def index(request, **kwarg):
                 # print(f"roundparticipant : {rp}")
                 if rp.participant not in participants:
                     participants.append(rp.participant)
+    if not participants:
+        pList = Participant.objects.filter(type = 1)
+        for p in pList:
+            participants.append(p)
     # print("---------")
     # print(f"participants: {participants}")
     # print(f"lastEvent: {lastEvent}")
@@ -210,3 +214,40 @@ def dashboard_table(request, eventId):
         'totalCost' : totalCost
     }
     return JsonResponse(response)
+
+
+def getRoundList(request, eventId):
+    rounds = Round.objects.filter(event = eventId).order_by('-order')
+    lastEvent = Event.objects.order_by('-id')[0]
+    html = ''
+    if lastEvent.id == eventId:
+        html = '<option value=0> + New Round</option>'
+    for i, r in enumerate(rounds):
+        if i == 0:
+            html += '<option value="' + str(r.id) + '" selected> ' + str(r.order) + '</option>'
+        else:
+            html += '<option value="' + str(r.id) + '"> ' + str(r.order) + '</option>'
+    return HttpResponse(html)
+
+
+def getRoundDetail(request, roundId):
+    if int(roundId):
+        r = Round.objects.get(pk=int(roundId))
+        rpList = RoundParticipant.objects.filter(round = int(roundId))
+
+        pq = {}
+        pq['total'] = r.total
+        pq['payee'] = r.payee.id
+        # pq['payee-name'] = r.payee.name
+        pq['note'] = r.note
+        pq['pq'] = {}
+
+        for rp in rpList:
+            p = str(rp.participant.name) + "-quantity"
+            q = rp.quantity
+            pq['pq'][str(p)] = q
+        return JsonResponse(pq)
+
+
+def test(request):
+    return render (request, 'shots/test.html')

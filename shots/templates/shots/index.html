@@ -20,10 +20,10 @@
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.quantity-left-minus').forEach(button => {
-          var inputId = button.dataset.field;
+          let inputId = button.dataset.field;
           console.log(inputId);
           button.onclick = function () {
-            var quantity = parseInt($("#"+inputId).val());
+            let quantity = parseInt($("#"+inputId).val());
             console.log(parseInt($("#"+inputId).val()));
             if( quantity > 0 ) {
               $("#"+inputId).val(quantity - 1);
@@ -35,12 +35,12 @@
         });
 
         document.querySelectorAll('.quantity-right-plus').forEach(button => {
-          var inputId = button.dataset.field;
+          let inputId = button.dataset.field;
           button.onclick = function () {
-            var quantity = parseInt($("#"+inputId).val());
+            let quantity = parseInt($("#"+inputId).val());
             $("#"+inputId).val(quantity + 1);
             if($("#"+inputId).val() > 0){
-              var buttons = document.querySelectorAll('[data-field="'+inputId+'"]');
+              let buttons = document.querySelectorAll('[data-field="'+inputId+'"]');
               for (i = 0; i < buttons.length; ++i) {
                 if(buttons[i].classList.contains('quantity-left-minus')){
                   if(buttons[i].disabled == true){
@@ -53,18 +53,80 @@
         });
 
         // assign value to a hidden field on add participant modal
-        $('#participant-round-id').val($('#roundList').val());
+        updateRoundId();
+        getRoundDetail($('#roundList').val())
 
-        // on the change of the round, change the value accordingly
+        // on the change of the round, change the value accordingly in participant modal
         $('#roundList').change(function() {
-          $('#participant-round-id').val($(this).val());
+          updateRoundId();
+          getRoundDetail($(this).val());
         });
 
+        $('#eventList').change(function () {getRound($(this).val())});
       });
+      // end of document.ready
+
+      function getRound(eventId) {
+          fetch(`getRoundList/${eventId}`)
+          .then(response => response.text())
+          .then(text => {
+            $('#roundList').empty();
+            $('#roundList').append(text);
+            updateRoundId();
+            getRoundDetail($('#roundList').val())
+          });
+      };
+
+      function updateRoundId() {
+        $('#participant-round-id').val($('#roundList').val());
+        // alert($('#participant-round-id').val());
+      };
+
+      function getRoundDetail(roundId) {
+        if (roundId != 0){
+          fetch(`getRoundDetail/${roundId}`)
+          .then(response => response.json())
+          .then(data => {
+            $('#total').val(data.total);
+            $('#payeeList').val(data.payee);
+            $('#note').val(data.note);
+            for (p in data.pq) {
+              $(`#${p}`).val(data.pq[p]);
+            };
+          });
+        }
+        else {
+          $('#form_event').trigger('reset');
+        };
+      };
 
     </script>
   </head>
   <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">
+            <img src="{% static 'assets/shot.png' %}" height="30" width="30">
+          </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="dashboard/{{lastEvent.id}}">Balance Dashboard<span class="sr-only">(current)</span></a></li>
+            <li class="active"><a href="./{{lastEvent.id}}">Event Detail</a></li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
     <div class="clearfix"></div>
     <div class="col-lg-3"></div>
     <form class="col-lg-6" id="form_event" action="{% url 'shots:addRound' %}" method="post">
@@ -101,32 +163,35 @@
         </div>
       </div>
       <div class="clearfix"></div>
-      {% for participant in participants %}
-        <div class="form-group">
-          <label>{{ participant.name }} </label>
-          <div class="input-group">
-            <span class="input-group-btn">
-              <button type="button" class="quantity-left-minus btn btn-danger btn-number"  data-type="minus" data-field="{{ participant.name }}-quantity">
-                <span class="glyphicon glyphicon-minus"></span>
-              </button>
-            </span>
-            <input type="hidden" name="participant" value="{{ participant.id }}">
-            <input type="text" id="{{ participant.name }}-quantity" name="quantity-{{ participant.id }}" class="form-control input-number" value="10" min="1" max="100">
-            <span class="input-group-btn">
-              <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="{{ participant.name }}-quantity">
-                  <span class="glyphicon glyphicon-plus"></span>
-              </button>
-            </span>
+      <div id="participantList">
+        {% for participant in participants %}
+          <div class="form-group">
+            <label>{{ participant.name }} </label>
+            <div class="input-group">
+              <span class="input-group-btn">
+                <button type="button" class="quantity-left-minus btn btn-danger btn-number"  data-type="minus" data-field="{{ participant.name }}-quantity">
+                  <span class="glyphicon glyphicon-minus"></span>
+                </button>
+              </span>
+              <input type="hidden" name="participant" value="{{ participant.id }}">
+              <input type="text" id="{{ participant.name }}-quantity" name="quantity-{{ participant.id }}" class="form-control input-number" value="0" min="0" max="100">
+              <span class="input-group-btn">
+                <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="{{ participant.name }}-quantity">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </button>
+              </span>
+            </div>
           </div>
-        </div>
-        <div class="clearfix"></div>
-      {% endfor %}
+          <div class="clearfix"></div>
+        {% endfor %}
+      </div>
       <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#AddParticipantModal">
         Add Participant
       </button>
       <div class="clearfix"></div>
       <div class="form-group">
         <select id="payeeList" class="form-control" name="payee">
+          <option selected disabled hidden value="">Please select one</option>
           {% for participant in participants %}
             <option value="{{ participant.id }}">{{ participant.name }}</option>
           {% endfor %}
@@ -135,15 +200,15 @@
       <div class="form-group">
         <label>Total </label>
         <div class="input-group">
-          <input type="text" class="form-control" placeholder="500" name="total">
+          <input id="total" type="text" class="form-control" placeholder="500" name="total" required>
           <span class="input-group-addon">,000</span>
         </div>
       </div>
       <div class="form-group">
         <label>Note </label>
-        <input type="text" class="form-control" placeholder="Note" name="note">
+        <input id="note" type="text" class="form-control" placeholder="Note" name="note">
       </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <button type="submit" class="btn btn-primary">Add</button>
     </form>
 
     <!-- Modals start here -->
@@ -202,4 +267,4 @@
       </div>
     </div>
   </body>
-  </html>
+</html>

@@ -21,53 +21,16 @@
     <title>Drunk</title>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.quantity-left-minus').forEach(button => {
-          var inputId = button.dataset.field;
-          console.log(inputId);
-          button.onclick = function () {
-            var quantity = parseInt($("#"+inputId).val());
-            console.log(parseInt($("#"+inputId).val()));
-            if( quantity > 0 ) {
-              $("#"+inputId).val(quantity - 1);
-            }
-            if($("#"+inputId).val() == 0){
-              button.disabled = true;
-            }
-          }
-        });
-
-        document.querySelectorAll('.quantity-right-plus').forEach(button => {
-          var inputId = button.dataset.field;
-          button.onclick = function () {
-            var quantity = parseInt($("#"+inputId).val());
-            $("#"+inputId).val(quantity + 1);
-            if($("#"+inputId).val() > 0){
-              var buttons = document.querySelectorAll('[data-field="'+inputId+'"]');
-              for (i = 0; i < buttons.length; ++i) {
-                if(buttons[i].classList.contains('quantity-left-minus')){
-                  if(buttons[i].disabled == true){
-                    buttons[i].disabled = false;
-                  }
-                }
-              }
-            }
-          }
-        });
-
-        // assign value to a hidden field on add participant modal
-        $('#participant-round-id').val($('#roundList').val());
-
-        // on the change of the round, change the value accordingly
-        $('#roundList').change(function() {
-          $('#participant-round-id').val($(this).val());
-        });
+        // show dashboard of the first loaded event
+        showDashboard({{eventId}});
 
         // changing an event would change the dashboard
-        $('#event').change(function() {showDashboard($(this).val())});
-
-        // color the balance
-
+        $('#event').change(function() {
+          showDashboard($(this).val());
+        });
       });
+
+      // show the dashboard details
       function showDashboard(eventId) {
         fetch(`../dashboard_table/${eventId}`)
         .then(response => response.json())
@@ -76,13 +39,38 @@
           $('#dashboard-tbody-view').append(data.response);
           $('#total-cost').empty();
           $('#total-cost').html('Total Payment: ' + data.totalCost);
+          $('#new-round-button').attr('href', {% url 'shots:index'%} + eventId);
+
         })
       };
 
-      showDashboard({{eventId}});
     </script>
   </head>
   <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">
+            <img src="{% static 'assets/shot.png' %}" height="30" width="30">
+          </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="./{{eventId}}">Balance Dashboard<span class="sr-only">(current)</span></a></li>
+            <li><a href="../{{eventId}}">Event Detail</a></li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
     <div class="header">&nbsp;</div>
     <div class="col-lg-3"></div>
     <div class="col-lg-6">
@@ -116,11 +104,16 @@
     <div class="col-lg-3"></div>
     <div class="col-lg-6">
       {% if totalCost != 0 %}
-        <p class="total-cost" id="total-cost">Total Payment: {{totalCost}}</p>
+        <div class="col-lg-12">
+          <div class="total-cost" id="total-cost">Total Payment: {{totalCost}}</div>
+        </div>
+        <div class="clearfix"></div>
       {% endif %}
-      <a id="new-round-button" class="btn btn-primary" href="{% url 'shots:index' %}{{eventId}}">
-        New Round
-      </a>
+      <div class="center-block">
+        <a id="new-round-button" class="btn btn-primary" href="{% url 'shots:index' %}{{eventId}}">
+          New Round
+        </a>
+      </div>
     </div>
 
   </body>

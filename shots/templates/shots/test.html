@@ -1,32 +1,9 @@
-<!DOCTYPE html>
+{% load menu_item %}
 <html lang="en" >
-  <head>
-    <title>Test</title>
-  </head>
-
+  <head></head>
   <body>
-    <!-- <p>participants: {{participants}}</p>
-    <br/><br/>
-    <p>quantities: {{quantities}}</p>
-    <br/> -->
-    <p>{{list}}</p>
-    <div>
-      {% for p1, q1 in list %}
-        <div>participant: {{p1}}</div>
-
-        <div>quantity: {{q1}}</div>
-        <hr>
-      {% endfor %}
-    </div>
-    <hr>
-    <div>rp List start here</div>
-    <div>
-      {% for rp in rpList %}
-        <div>rp: {{rp}}</div>
-
-        <hr>
-      {% endfor %}
-    </div>
-    <a href="{% url 'shots:index' %}">Index</a>
-  </body>
+{% menu_item "/foo/" "Foo" %}
+{% menu_item "/bar/" "Bar" %}
+{% menu_item "http://example.com" "Baz" %}
+</body>
 </html>

@@ -97,3 +97,12 @@ body {
   height: 10%;
   width: 100%
 }
+
+.center-block {
+  float: none;
+  margin: 0 auto;
+}
+
+.navbar-brand {
+  padding-top: 10px !important;
+}
