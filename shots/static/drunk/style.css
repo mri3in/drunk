@@ -48,12 +48,12 @@
   position: relative;
 }
 
-html {
+/* html {
   height: 100%;
   overflow-x: hidden;
   overflow-y: hidden;
 
-}
+} */
 
 body {
   color: rgba(163, 38, 102, 1) !important;
@@ -104,7 +104,7 @@ body {
 }
 
 .navbar-brand {
-  padding-top: 10px !important;
+  padding-left: 1rem;
 }
 
 .btn-outline-primary {
@@ -139,7 +139,7 @@ body {
 }
 
 .btn-drunk-primary:active {
-  color: #B2296F !important;
+  color: #fff !important;
   background-color: #B2296F !important;
   background-image: none;
 }

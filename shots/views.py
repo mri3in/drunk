@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from datetime import date
 from django.http import HttpResponse, JsonResponse
+import sys
 
 # Create your views here.
 def index(request, **kwarg):
@@ -95,67 +96,75 @@ def addEvent(request):
 
 
 def addParticipant(request):
-    if request.method == "POST":
-        # nameForm = request.POST["participant-name"].strip()
-        # nicknameForm = request.POST["participant-nickname"].strip()
-        # # typeForm = request.POST.get("participant-type", False)
-        # typeForm = request.POST['participant-type']
-        # event = Event.objects.get(pk=int(request.POST["event-id"]))
-        ################
-        # print(request.body)
-        nameForm = request.POST.get("participant-name")
-        nicknameForm = request.POST.get("participant-nickname")
-        # typeForm = request.POST.get("participant-type", False)
-        typeForm = request.POST.get('participant-type', False)
-        eventId = request.POST.get("event-id")
-        # print(f"nameForm: {nameForm}; nickname : {nicknameForm}; typeForm {typeForm}; eventId : {eventId}")
-        event = Event.objects.get(pk=int(eventId))
-        participants = []
-        rounds = event.rounds.all()
-        events = Event.objects.order_by('-id')
-        # print(Participant.objects.filter(name = str(nameForm)).count())
-        if Participant.objects.filter(name = str(nameForm)).count() == 0:
-        # if str(nameForm):
-            p = Participant(name = str(nameForm), nickname = str(nicknameForm), type = typeForm)
-            # p.save()
-            if p not in participants:
-                participants.append(p)
-        else:
-            message = f"{nameForm} exists."
-            print(message)
-            return JsonResponse({"nameForm": nameForm, "event":event.id, "message": message})
+    try:
+        if request.method == "POST":
+            nameForm = request.POST["participant-name"].strip()
+            nicknameForm = request.POST["participant-nickname"].strip()
+            typeForm = request.POST.get("participant-type", False)
+            event = Event.objects.get(pk=int(request.POST["event-id"]))
+            ################
+            # nameForm = request.POST.get("participant-name")
+            # nicknameForm = request.POST.get("participant-nickname")
+            # typeForm = request.POST.get('participant-type', False)
+            # eventId = request.POST.get("event-id")
+            # # print(f"nameForm: {nameForm}; nickname : {nicknameForm}; typeForm {typeForm}; eventId : {eventId}")
+            # event = Event.objects.get(pk=int(eventId))
+            ###############
+            participants = []
+            rounds = event.rounds.all()
+            events = Event.objects.order_by('-id')
+            message = {'status': "", 'message': ""}
+            # end of var initial
 
 
-        # return JsonResponse({"nameForm": nameForm, "event":event.id})
+            if Participant.objects.filter(name = str(nameForm)).count() == 0:
+                p = Participant(name = str(nameForm), nickname = str(nicknameForm), type = typeForm)
+                p.save()
+                if p not in participants:
+                    participants.append(p)
+                message['status'] = 'success'
+                message['message'] = f"{nameForm} is added successfully."
+            else:
+                message['status'] = 'error'
+                message['message'] = f"{nameForm} exists."
+                # return JsonResponse({"nameForm": nameForm, "event":event.id, "message": message})
 
-        if rounds:
-            lastRound = rounds[0]
-            for round in rounds:
-                rpList = RoundParticipant.objects.filter(round=round.id)
-                for rp in rpList:
-                    if rp.participant not in participants:
-                        participants.append(rp.participant)
-        if not participants:
-            pList = Participant.objects.filter(type = 1)
-            for p1 in pList:
-                participants.append(p1)
+            if rounds:
+                for round in rounds:
+                    rpList = RoundParticipant.objects.filter(round=round.id)
+                    for rp in rpList:
+                        if rp.participant not in participants:
+                            participants.append(rp.participant)
+            if not participants:
+                pList = Participant.objects.filter(type = 1)
+                for p1 in pList:
+                    participants.append(p1)
 
-        # return JsonResponse({"nameForm": nameForm, "event":event.id})
+            # return JsonResponse({"nameForm": nameForm, "event":event.id})
 
-        roundIdForm = int(request.POST.get("round-id"))
+            roundIdForm = int(request.POST.get("round-id"))
 
-        if roundIdForm != 0:
-            r = Round.objects.get(pk=roundIdForm)
-            rp = RoundParticipant(round=r, participant=p, quantity=0)
-            rp.save()
+            if roundIdForm != 0:
+                r = Round.objects.get(pk=roundIdForm)
+                rp = RoundParticipant(round=r, participant=p, quantity=0)
+                rp.save()
 
-        return render(request, 'shots/index.html', {
-            "lastEvent": event,
-            "participants": participants,
-            "events": events,
-            "rounds": rounds,
-            "lastRound": lastRound
-            })
+            # return JsonResponse({
+            #     "lastEvent": event,
+            #     "participants": participants,
+            #     "events": events,
+            #     "rounds": rounds,
+            #     "lastRound": lastRound
+            #     })
+            return render(request, 'shots/index.html', {
+                "lastEvent": event,
+                "participants": participants,
+                "events": events,
+                "rounds": rounds,
+                "message": message
+                })
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
 
 def calculateBalance(event_id):
     e = Event.objects.get(id=event_id)

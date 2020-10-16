@@ -10,21 +10,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
     <!-- Optional theme -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
     <script src="https://use.fontawesome.com/fea871f00c.js"></script>
     <title>Drunk</title>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.quantity-left-minus').forEach(button => {
           let inputId = button.dataset.field;
-          console.log(inputId);
+          // console.log(inputId);
           button.onclick = function () {
             let quantity = parseInt($("#"+inputId).val());
-            console.log(parseInt($("#"+inputId).val()));
+            // console.log(parseInt($("#"+inputId).val()));
             if( quantity > 0 ) {
               $("#"+inputId).val(quantity - 1);
             }
@@ -68,35 +69,47 @@
           $('#participant-event-id').val($(this).val());
         });
 
-        $('#AddParticipantModal').submit(function (event) {
-          // Stop form from submitting normally
-          event.preventDefault();
-          alert("post jquery");
+        $('#add-participant-button').height(document.getElementById('participantList').children[0].children[0].clientHeight);
 
-          let $form = $(this),
-            nameForm = $form.find( "input[name='participant-name']" ).val(),
-            nicknameForm = $form.find( "input[name='participant-nickname']" ).val(),
-            typeForm = $form.find( "input[name='participant-type']:checked" ).val(),
-            eventId = $form.find( "input[name='event-id']" ).val(),
-            roundId = $form.find("input[name='round-id']").val(),
-            url = $form.attr( "action" );
+        // $('#AddParticipantModal').submit(function (event) {
+        //   // Stop form from submitting normally
+        //   event.preventDefault();
+        //   const csrftoken = getCookie('csrftoken');
+        //   // const request = new Request(
+        //   //     /* URL */,
+        //   //     {headers: {'X-CSRFToken': csrftoken}}
+        //   //   );
+        //
+        //   let $form = $(this),
+        //     nameForm = $form.find( "input[name='participant-name']" ).val(),
+        //     nicknameForm = $form.find( "input[name='participant-nickname']" ).val(),
+        //     typeForm = $form.find( "input[name='participant-type']:checked" ).val(),
+        //     eventId = $form.find( "input[name='event-id']" ).val(),
+        //     roundId = $form.find("input[name='round-id']").val(),
+        //     urlForm = $form.attr( "action" );
+        //
+        //   if (typeForm === undefined){
+        //     typeForm = "False";
+        //   };
+        //   let input = {'participant-name': nameForm,  'participant-nickname': nicknameForm, 'participant-type': typeForm, 'event-id': eventId , 'round-id': roundId};
+        //   // alert(JSON.stringify(input));
+        //   $.ajax({
+        //     url: urlForm,
+        //     headers: {'X-CSRFToken': csrftoken},
+        //     data: {'participant-name': nameForm,  'participant-nickname': nicknameForm, 'participant-type': typeForm, 'event-id': eventId , 'round-id': roundId},
+        //     method: "POST",
+        //     dataType: "json",
+        //     error: function(xhr, status, error) {
+        //       console.log(xhr.responseText)
+        //       // let err = JSON.parse(xhr.responseText);
+        //       // alert(err.Message);
+        //     }
+        //   });
+        //   // alert(JSON.stringify(input));
+        //
+        // });
 
-          if (typeForm === undefined){
-            typeForm = "False";
-          };
-
-          let posting = $.post( url, { 'participant-name': nameForm,  'participant-nickname': nicknameForm, 'participant-type': typeForm, 'event-id': eventId , 'round-id': roundId}, function( data ) {
-            console.log(JSON.parse(data));
-          }, "json");
-
-          // Put the results in a div
-          posting.done(function( data ) {
-            alert(data);
-          });
-        });
-
-      });
-      // end of document.ready
+      }); // end of document.ready
 
       function getRound(eventId) {
           fetch(`getRoundList/${eventId}`)
@@ -132,121 +145,136 @@
         };
       };
 
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+      };
+
     </script>
   </head>
   <body>
-    <nav class="navbar navbar-default">
-      <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">
-            <img src="{% static 'assets/shot.png' %}" height="30" width="30">
-          </a>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">
+        <img src="{% static 'assets/shot.png' %}" height="30" width="30">
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active"><a class="nav-link" href="dashboard/{{lastEvent.id}}">Balance Dashboard</a></li>
+          <li class="nav-item active"><a class="nav-link" href="./{{lastEvent.id}}">Event Detail<span class="sr-only">(current)</span></a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="clearfix"></div>
+    <div class="row">
+      <div class="col-0 col-sm-0 col-md-1 col-lg-3 "></div>
+      <form class="col-12 col-sm-12 col-md-10 col-lg-6" id="form_event" action="{% url 'shots:addRound' %}" method="post">
+        <div class="row">
+          {% csrf_token %}
+          <div class="col-lg-2 col-sm-2 col-2">
+            <button type="button" class="btn btn-drunk-primary" data-toggle="modal" data-target="#myModal">
+              <span class="material-icons md-18">plus_one</span><span class="sm-only"> Event</span>
+            </button>
+          </div>
+
+          <div class="col-lg-5 col-sm-10 col-10">
+            <select id="eventList" class="form-control" name="event">
+              {% for event in events %}
+                {% if event == lastEvent %}
+                  <option value="{{ event.id }}" selected>{{ event.name }}</option>
+                {% else %}
+                  <option value="{{ event.id }}">{{ event.name }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
         </div>
 
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-          <ul class="nav navbar-nav">
-            <li><a href="dashboard/{{lastEvent.id}}">Balance Dashboard<span class="sr-only">(current)</span></a></li>
-            <li class="active"><a href="./{{lastEvent.id}}">Event Detail</a></li>
-          </ul>
-        </div><!-- /.navbar-collapse -->
-      </div><!-- /.container-fluid -->
-    </nav>
-    <div class="clearfix"></div>
-    <div class="col-lg-3"></div>
-    <form class="col-lg-6" id="form_event" action="{% url 'shots:addRound' %}" method="post">
-      {% csrf_token %}
-      <div class="col-lg-2 col-sm-2 col-xs-2">
-        <button type="button" class="btn btn-drunk-primary" data-toggle="modal" data-target="#myModal">
-          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span class="sm-only"> Event</span>
-        </button>
-      </div>
+        <br>
+        <div class="row">
+          <div class="col-lg-12 col-sm-12 col-12">
+            <select id="roundList" class="form-control" name="round">
+              <option value=0 selected> + New Round</option>
+              {% for round in rounds %}
+                <option value="{{ round.id }}">{{ round.order }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
 
-      <div class="col-lg-5 col-sm-10 col-xs-10">
-        <select id="eventList" class="form-control" name="event">
-          {% for event in events %}
-            {% if event == lastEvent %}
-              <option value="{{ event.id }}" selected>{{ event.name }}</option>
-            {% else %}
-              <option value="{{ event.id }}">{{ event.name }}</option>
-            {% endif %}
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="clearfix"></div>
-      <br>
-      <div class="col-lg-12 col-sm-12 col-xs-12">
-        <select id="roundList" class="form-control" name="round">
-          <option value=0 selected> + New Round</option>
-          {% for round in rounds %}
-            <option value="{{ round.id }}">{{ round.order }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="clearfix"></div>
-      <div>
-        <div id="participantList">
+        <div id="participantList" class="row">
           {% for participant in participants %}
-          <div class="col-lg-6 col-sm-6 col-xs-6">
+          <div class="col-lg-6 col-sm-6 col-6">
             <div class="form-group">
               <label>{{ participant.name }} </label>
               <div class="input-group">
                 <span class="input-group-btn">
                   <button type="button" class="quantity-left-minus btn btn-danger btn-number"  data-type="minus" data-field="{{ participant.name }}-quantity">
-                    <span class="glyphicon glyphicon-minus"></span>
+                    <span class="material-icons">exposure_neg_1</span>
                   </button>
                 </span>
                 <input type="hidden" name="participant" value="{{ participant.id }}">
                 <input type="text" id="{{ participant.name }}-quantity" name="quantity-{{ participant.id }}" class="form-control input-number" value="0" min="0" max="100">
                 <span class="input-group-btn">
                   <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="{{ participant.name }}-quantity">
-                      <span class="glyphicon glyphicon-plus"></span>
+                    <span class="material-icons md-18">plus_one</span>
                   </button>
                 </span>
               </div>
             </div>
           </div>
           {% endfor %}
+          <div class="col-lg-6 col-sm-6 col-6">
+            <div class="form-group" style="position: relative" id="add-participant-button">
+              <button type="button" class="btn btn-drunk-primary stick-to-bottom" data-toggle="modal" data-target="#AddParticipantModal">
+                <span class="material-icons md-18">plus_one</span>
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div class="col-lg-6 col-sm-6 col-xs-6">
-          <button type="button" class="btn btn-drunk-primary stick-to-bottom" data-toggle="modal" data-target="#AddParticipantModal">
-            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-          </button>
-        </div>
-      </div>
-      <div class="clearfix"></div>
-      <div class="form-group">
-        <select id="payeeList" class="form-control" name="payee">
-          <option selected disabled hidden value="">Please select one</option>
-          {% for participant in participants %}
-            <option value="{{ participant.id }}">{{ participant.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Total </label>
-        <div class="input-group">
-          <input id="total" type="text" class="form-control" placeholder="500" name="total" required>
-          <span class="input-group-addon">,000</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Note </label>
-        <input id="note" type="text" class="form-control" placeholder="Note" name="note">
-      </div>
-      <button type="submit" class="btn btn-primary">Add</button>
-    </form>
+        <div class="clearfix"></div>
 
+        <div class="form-group">
+          <select id="payeeList" class="form-control" name="payee">
+            <option selected disabled hidden value="">Please select one</option>
+            {% for participant in participants %}
+              <option value="{{ participant.id }}">{{ participant.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Total </label>
+          <div class="input-group">
+            <input id="total" type="text" class="form-control" placeholder="500" name="total" required>
+            <div class="input-group-append">
+              <span class="input-group-text">,000</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Note </label>
+          <input id="note" type="text" class="form-control" placeholder="Note" name="note">
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+
+    </div>
     <!-- Modals start here -->
     <!-- Add Event Modal -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
