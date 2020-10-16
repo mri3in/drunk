@@ -14,9 +14,7 @@ def index(request, **kwarg):
     events = Event.objects.order_by('-id')
     rounds = lastEvent.rounds.order_by('-order')
     participants = []
-    lastRound = ""
     if rounds:
-        lastRound = rounds[0]
         for round in rounds:
             rpList = RoundParticipant.objects.filter(round=round.id)
             # print(f"round: {round}")
@@ -38,7 +36,6 @@ def index(request, **kwarg):
         "participants": participants,
         "events": events,
         "rounds": rounds,
-        "lastRound": lastRound
     })
 
 
@@ -99,18 +96,66 @@ def addEvent(request):
 
 def addParticipant(request):
     if request.method == "POST":
-        nameForm = request.POST["participant-name"].strip()
-        nicknameForm = request.POST["participant-nickname"].strip()
-        typeForm = request.POST.get("participant-type", False)
+        # nameForm = request.POST["participant-name"].strip()
+        # nicknameForm = request.POST["participant-nickname"].strip()
+        # # typeForm = request.POST.get("participant-type", False)
+        # typeForm = request.POST['participant-type']
+        # event = Event.objects.get(pk=int(request.POST["event-id"]))
+        ################
+        # print(request.body)
+        nameForm = request.POST.get("participant-name")
+        nicknameForm = request.POST.get("participant-nickname")
+        # typeForm = request.POST.get("participant-type", False)
+        typeForm = request.POST.get('participant-type', False)
+        eventId = request.POST.get("event-id")
+        # print(f"nameForm: {nameForm}; nickname : {nicknameForm}; typeForm {typeForm}; eventId : {eventId}")
+        event = Event.objects.get(pk=int(eventId))
+        participants = []
+        rounds = event.rounds.all()
+        events = Event.objects.order_by('-id')
+        # print(Participant.objects.filter(name = str(nameForm)).count())
+        if Participant.objects.filter(name = str(nameForm)).count() == 0:
+        # if str(nameForm):
+            p = Participant(name = str(nameForm), nickname = str(nicknameForm), type = typeForm)
+            # p.save()
+            if p not in participants:
+                participants.append(p)
+        else:
+            message = f"{nameForm} exists."
+            print(message)
+            return JsonResponse({"nameForm": nameForm, "event":event.id, "message": message})
 
-        p = Participant(name = nameForm, nickname = nicknameForm, type = typeForm)
-        p.save()
-        roundIdFrom = int(request.POST["round-id"])
-        r = Round.objects.get(pk=roundIdFrom)
-        rp = RoundParticipant(round=r, participant=p, quantity=0)
-        rp.save()
-        return HttpResponseRedirect(reverse("shots:index"))
 
+        # return JsonResponse({"nameForm": nameForm, "event":event.id})
+
+        if rounds:
+            lastRound = rounds[0]
+            for round in rounds:
+                rpList = RoundParticipant.objects.filter(round=round.id)
+                for rp in rpList:
+                    if rp.participant not in participants:
+                        participants.append(rp.participant)
+        if not participants:
+            pList = Participant.objects.filter(type = 1)
+            for p1 in pList:
+                participants.append(p1)
+
+        # return JsonResponse({"nameForm": nameForm, "event":event.id})
+
+        roundIdForm = int(request.POST.get("round-id"))
+
+        if roundIdForm != 0:
+            r = Round.objects.get(pk=roundIdForm)
+            rp = RoundParticipant(round=r, participant=p, quantity=0)
+            rp.save()
+
+        return render(request, 'shots/index.html', {
+            "lastEvent": event,
+            "participants": participants,
+            "events": events,
+            "rounds": rounds,
+            "lastRound": lastRound
+            })
 
 def calculateBalance(event_id):
     e = Event.objects.get(id=event_id)
