@@ -153,6 +153,9 @@ body {
   .sm-only {
     display: none !important;
   }
+  .clearfix {
+    height: 1px;
+  }
 }
 
 /* Small devices (tablets, 768px and up) */
@@ -160,4 +163,25 @@ body {
   .sm-only {
     display: inline !important;
   }
+  .clearfix {
+    height: 5px;
+  }
+}
+
+.participant-quantity {
+  border: none !important;
+  text-align: center;
+  pointer-events: none;
+  margin: 0px 3px;
+  background: rgba(163, 38, 102, 1) !important;
+  color: white !important;
+}
+
+.drunk {
+  background: rgba(163, 38, 102, 1) !important;
+  color: white !important;
+}
+
+.btn-number:focus {
+  box-shadow: 0 0 0 0.2rem rgb(0 0 0 / 0) !important;
 }

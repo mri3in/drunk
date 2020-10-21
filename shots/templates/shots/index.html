@@ -20,6 +20,79 @@
     <title>Drunk</title>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
+        adjustQuantity();
+
+        // assign value to a hidden field on add participant modal
+        updateRoundId();
+        getRoundDetail($('#roundList').val())
+        $('#participant-event-id').val($('#eventList').val());
+
+        // on the change of the round, change the value accordingly in participant modal
+        $('#roundList').change(function() {
+          updateRoundId();
+          getRoundDetail($(this).val());
+        });
+
+        $('#eventList').change(function () {
+          getRound($(this).val());
+          $('#participant-event-id').val($(this).val());
+        });
+
+        $('#add-participant-button').height(document.getElementById('participantList').children[0].children[0].clientHeight);
+
+        $('#Add-Participant-Form').submit(function (event) {
+          // Stop form from submitting normally
+          event.preventDefault();
+
+          let $form = $(this),
+            nameForm = $form.find( "input[name='participant-name']" ).val(),
+            nicknameForm = $form.find( "input[name='participant-nickname']" ).val(),
+            typeForm = $form.find( "input[name='participant-type']:checked" ).val(),
+            eventId = $form.find( "input[name='event-id']" ).val(),
+            roundId = $form.find("input[name='round-id']").val(),
+            urlForm = $form.attr( "action" ),
+            csrf = $form.find("input[name='csrfmiddlewaretoken']").val();
+
+          if (typeForm === undefined){
+            typeForm = "False";
+          };
+          let input = $form.serialize();
+          // alert(JSON.stringify(input));
+
+          $.ajax({
+            url: urlForm,
+            data: input,
+            method: "POST",
+            dataType: "json",
+            error: function (response) {
+              console.log(response)
+            },
+            success: function(response) {
+              console.log(response);
+              let htmlResponse = $.parseHTML(response.htmlResponse);
+              let parser = new DOMParser();
+              let htmlResponse1 = response.htmlResponse;
+              let htmlResponse2 = parser.parseFromString(htmlResponse1, "text/html");
+              // let doc = parser.parseFromString(stringContainingXMLSource, "application/xml")
+              // let htmlResponse = response.htmlResponse;
+
+              console.log(htmlResponse);
+              console.log(response.htmlResponse);
+              let i = document.getElementById('participantList').childElementCount - 2;
+              let list = document.getElementById('participantList');
+              console.log(i);
+              // document.getElementById('participantList').children[i].innerHTML += htmlResponse;
+              $('#participantList').children().eq(i).after(htmlResponse1);
+              adjustQuantity();
+              // list.appendChild(htmlResponse2);
+            }
+          });
+
+        });
+
+      }); // end of document.ready
+
+      function adjustQuantity () {
         document.querySelectorAll('.quantity-left-minus').forEach(button => {
           let inputId = button.dataset.field;
           // console.log(inputId);
@@ -52,64 +125,7 @@
             }
           }
         });
-
-        // assign value to a hidden field on add participant modal
-        updateRoundId();
-        getRoundDetail($('#roundList').val())
-        $('#participant-event-id').val($('#eventList').val());
-
-        // on the change of the round, change the value accordingly in participant modal
-        $('#roundList').change(function() {
-          updateRoundId();
-          getRoundDetail($(this).val());
-        });
-
-        $('#eventList').change(function () {
-          getRound($(this).val());
-          $('#participant-event-id').val($(this).val());
-        });
-
-        $('#add-participant-button').height(document.getElementById('participantList').children[0].children[0].clientHeight);
-
-        // $('#AddParticipantModal').submit(function (event) {
-        //   // Stop form from submitting normally
-        //   event.preventDefault();
-        //   const csrftoken = getCookie('csrftoken');
-        //   // const request = new Request(
-        //   //     /* URL */,
-        //   //     {headers: {'X-CSRFToken': csrftoken}}
-        //   //   );
-        //
-        //   let $form = $(this),
-        //     nameForm = $form.find( "input[name='participant-name']" ).val(),
-        //     nicknameForm = $form.find( "input[name='participant-nickname']" ).val(),
-        //     typeForm = $form.find( "input[name='participant-type']:checked" ).val(),
-        //     eventId = $form.find( "input[name='event-id']" ).val(),
-        //     roundId = $form.find("input[name='round-id']").val(),
-        //     urlForm = $form.attr( "action" );
-        //
-        //   if (typeForm === undefined){
-        //     typeForm = "False";
-        //   };
-        //   let input = {'participant-name': nameForm,  'participant-nickname': nicknameForm, 'participant-type': typeForm, 'event-id': eventId , 'round-id': roundId};
-        //   // alert(JSON.stringify(input));
-        //   $.ajax({
-        //     url: urlForm,
-        //     headers: {'X-CSRFToken': csrftoken},
-        //     data: {'participant-name': nameForm,  'participant-nickname': nicknameForm, 'participant-type': typeForm, 'event-id': eventId , 'round-id': roundId},
-        //     method: "POST",
-        //     dataType: "json",
-        //     error: function(xhr, status, error) {
-        //       console.log(xhr.responseText)
-        //       // let err = JSON.parse(xhr.responseText);
-        //       // alert(err.Message);
-        //     }
-        //   });
-        //   // alert(JSON.stringify(input));
-        //
-        // });
-
-      }); // end of document.ready
+      }
 
       function getRound(eventId) {
           fetch(`getRoundList/${eventId}`)
@@ -145,22 +161,6 @@
         };
       };
 
-      function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-      };
-
     </script>
   </head>
   <body>
@@ -187,7 +187,7 @@
         <div class="row">
           {% csrf_token %}
           <div class="col-lg-2 col-sm-2 col-2">
-            <button type="button" class="btn btn-drunk-primary" data-toggle="modal" data-target="#myModal">
+            <button type="button" class="btn btn-drunk-primary" data-toggle="modal" data-target="#addEventModal">
               <span class="material-icons md-18">plus_one</span><span class="sm-only"> Event</span>
             </button>
           </div>
@@ -216,28 +216,33 @@
             </select>
           </div>
         </div>
+        <div class="clearfix"></div>
 
         <div id="participantList" class="row">
           {% for participant in participants %}
           <div class="col-lg-6 col-sm-6 col-6">
             <div class="form-group">
-              <label>{{ participant.name }} </label>
-              <div class="input-group">
+              <div class="input-group drunk">
+                <div class="col-lg-8 col-sm-8 col-6" style="display: flex; align-items: center">
+                  <span>{{ participant.name }}</span>
+                </div>
                 <span class="input-group-btn">
-                  <button type="button" class="quantity-left-minus btn btn-danger btn-number"  data-type="minus" data-field="{{ participant.name }}-quantity">
-                    <span class="material-icons">exposure_neg_1</span>
+                  <button type="button" class="quantity-left-minus btn btn-number"  data-type="minus" data-field="{{ participant.name }}-quantity">
+                    <i class="fa fa-minus drunk" aria-hidden="true"></i>
                   </button>
                 </span>
                 <input type="hidden" name="participant" value="{{ participant.id }}">
-                <input type="text" id="{{ participant.name }}-quantity" name="quantity-{{ participant.id }}" class="form-control input-number" value="0" min="0" max="100">
+                <input type="text" id="{{ participant.name }}-quantity" name="quantity-{{ participant.id }}" class="form-control input-number participant-quantity" value="0" min="0" max="100">
                 <span class="input-group-btn">
-                  <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="{{ participant.name }}-quantity">
-                    <span class="material-icons md-18">plus_one</span>
+                  <button type="button" class="quantity-right-plus btn btn-number" data-type="plus" data-field="{{ participant.name }}-quantity">
+                    <i class="fa fa-plus drunk" aria-hidden="true"></i>
                   </button>
                 </span>
               </div>
             </div>
           </div>
+          {% empty %}
+          <label>There is no participant!</label>
           {% endfor %}
           <div class="col-lg-6 col-sm-6 col-6">
             <div class="form-group" style="position: relative" id="add-participant-button">
@@ -251,6 +256,7 @@
         <div class="clearfix"></div>
 
         <div class="form-group">
+          <label>Payee </label>
           <select id="payeeList" class="form-control" name="payee">
             <option selected disabled hidden value="">Please select one</option>
             {% for participant in participants %}
@@ -277,12 +283,12 @@
     </div>
     <!-- Modals start here -->
     <!-- Add Event Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="addEventModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Add New Event</h4>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Modal title</h4>
           </div>
           <form action="{% url 'shots:addEvent' %}" method="post">
             {% csrf_token %}
@@ -306,10 +312,10 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
-          <form action="{% url 'shots:addParticipant' %}" method="post">
+          <form action="{% url 'shots:addParticipant' %}" method="post" id="Add-Participant-Form" name="Add-Participant-Form">
             {% csrf_token %}
             <div class="modal-body">
                 <div class="form-group">
@@ -319,6 +325,7 @@
                   <input type="text" class="form-control" id="participant-nickname" name="participant-nickname">
                   <label for="participant-type" class="control-label">Frequent Member?:</label>
                   <input type="checkbox" id="participant-type" name="participant-type" value="True">
+                  <span>Yes</span>
                   <input type="text" hidden id="participant-round-id" name="round-id" value="1">
                   <input type="text" hidden id="participant-event-id" name="event-id" value="1">
                 </div>

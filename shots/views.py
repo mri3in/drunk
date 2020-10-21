@@ -96,6 +96,8 @@ def addEvent(request):
 
 
 def addParticipant(request):
+    message = {}
+    htmlResponse = ''
     try:
         if request.method == "POST":
             nameForm = request.POST["participant-name"].strip()
@@ -106,24 +108,28 @@ def addParticipant(request):
             # nameForm = request.POST.get("participant-name")
             # nicknameForm = request.POST.get("participant-nickname")
             # typeForm = request.POST.get('participant-type', False)
-            # eventId = request.POST.get("event-id")
-            # # print(f"nameForm: {nameForm}; nickname : {nicknameForm}; typeForm {typeForm}; eventId : {eventId}")
+            # event = request.POST.get("event-id")
+            print(f"nameForm: {nameForm}; nickname : {nicknameForm}; typeForm {typeForm}; eventId : {event}")
             # event = Event.objects.get(pk=int(eventId))
             ###############
             participants = []
             rounds = event.rounds.all()
             events = Event.objects.order_by('-id')
-            message = {'status': "", 'message': ""}
             # end of var initial
-
 
             if Participant.objects.filter(name = str(nameForm)).count() == 0:
                 p = Participant(name = str(nameForm), nickname = str(nicknameForm), type = typeForm)
-                p.save()
+                # p.save()
                 if p not in participants:
                     participants.append(p)
+
+                htmlResponse = f"<div class='col-lg-6 col-sm-6 col-6'><div class='form-group'><div class='input-group drunk'><div class='col-lg-8 col-sm-8 col-6' style='display: flex; align-items: center'><span>{p.name}</span></div><span class='input-group-btn'><button type='button' class='quantity-left-minus btn btn-number'  data-type='minus' data-field='{p.name}-quantity'><i class='fa fa-minus drunk' aria-hidden='true'></i></button></span><input type='hidden' name='participant' value='{str(p.id)}'><input type='text' id='{p.name}-quantity' name='quantity-{str(p.id)}' class='form-control input-number participant-quantity' value='0' min='0' max='100'><span class='input-group-btn'><button type='button' class='quantity-right-plus btn btn-number' data-type='plus' data-field='{p.name}-quantity'><i class='fa fa-plus drunk' aria-hidden='true'></i></button></span></div></div></div>"
+
                 message['status'] = 'success'
                 message['message'] = f"{nameForm} is added successfully."
+                message['id'] = str(p.id)
+                message['name'] = str(p.name)
+                message['htmlResponse'] = htmlResponse
             else:
                 message['status'] = 'error'
                 message['message'] = f"{nameForm} exists."
@@ -140,31 +146,18 @@ def addParticipant(request):
                 for p1 in pList:
                     participants.append(p1)
 
-            # return JsonResponse({"nameForm": nameForm, "event":event.id})
-
             roundIdForm = int(request.POST.get("round-id"))
 
             if roundIdForm != 0:
                 r = Round.objects.get(pk=roundIdForm)
                 rp = RoundParticipant(round=r, participant=p, quantity=0)
-                rp.save()
+                # rp.save()
 
-            # return JsonResponse({
-            #     "lastEvent": event,
-            #     "participants": participants,
-            #     "events": events,
-            #     "rounds": rounds,
-            #     "lastRound": lastRound
-            #     })
-            return render(request, 'shots/index.html', {
-                "lastEvent": event,
-                "participants": participants,
-                "events": events,
-                "rounds": rounds,
-                "message": message
-                })
+            return JsonResponse(message, status = 200)
     except:
-        print("Unexpected error:", sys.exc_info()[0])
+        message['status'] = 'error'
+        message['message'] = f"Unexpected error: {sys.exc_info()}"
+        return JsonResponse(message, status = 400)
 
 def calculateBalance(event_id):
     e = Event.objects.get(id=event_id)
