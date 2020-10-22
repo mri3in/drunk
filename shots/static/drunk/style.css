@@ -180,6 +180,7 @@ body {
 .drunk {
   background: rgba(163, 38, 102, 1) !important;
   color: white !important;
+  border-radius: 0.25rem;
 }
 
 .btn-number:focus {

@@ -95,7 +95,9 @@
       function adjustQuantity () {
         document.querySelectorAll('.quantity-left-minus').forEach(button => {
           let inputId = button.dataset.field;
-          // console.log(inputId);
+          if (parseInt($("#"+inputId).val()) == 0) {
+            button.disabled = true;
+          };
           button.onclick = function () {
             let quantity = parseInt($("#"+inputId).val());
             // console.log(parseInt($("#"+inputId).val()));
@@ -182,17 +184,17 @@
 
     <div class="clearfix"></div>
     <div class="row">
-      <div class="col-0 col-sm-0 col-md-1 col-lg-3 "></div>
+      <div class="col-0 col-sm-0 col-md-1 col-lg-3"></div>
       <form class="col-12 col-sm-12 col-md-10 col-lg-6" id="form_event" action="{% url 'shots:addRound' %}" method="post">
         <div class="row">
           {% csrf_token %}
-          <div class="col-lg-2 col-sm-2 col-2">
+          <div class="col-lg-2 col-sm-2 col-2 ml-auto mr-0">
             <button type="button" class="btn btn-drunk-primary" data-toggle="modal" data-target="#addEventModal">
-              <span class="material-icons md-18">plus_one</span><span class="sm-only"> Event</span>
+              <i class="fa fa-plus" aria-hidden="true"></i><span class="sm-only"> Event</span>
             </button>
           </div>
 
-          <div class="col-lg-5 col-sm-10 col-10">
+          <div class="col-lg-5 col-sm-10 col-10 mr-0">
             <select id="eventList" class="form-control" name="event">
               {% for event in events %}
                 {% if event == lastEvent %}
@@ -207,7 +209,7 @@
 
         <br>
         <div class="row">
-          <div class="col-lg-12 col-sm-12 col-12">
+          <div class="ml-auto mr-3">
             <select id="roundList" class="form-control" name="round">
               <option value=0 selected> + New Round</option>
               {% for round in rounds %}
@@ -241,13 +243,11 @@
               </div>
             </div>
           </div>
-          {% empty %}
-          <label>There is no participant!</label>
           {% endfor %}
           <div class="col-lg-6 col-sm-6 col-6">
             <div class="form-group" style="position: relative" id="add-participant-button">
               <button type="button" class="btn btn-drunk-primary stick-to-bottom" data-toggle="modal" data-target="#AddParticipantModal">
-                <span class="material-icons md-18">plus_one</span>
+                <i class="fa fa-plus" aria-hidden="true"></i>
               </button>
             </div>
           </div>
