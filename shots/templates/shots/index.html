@@ -67,11 +67,14 @@
             error: function (response) {
               // console.log(response);
               // create toast
-              // $('#toast-add-participant').children('.toast-header').eq(0).removeClass().addClass('toast-header toast-error');
+              $('#toast-area').removeClass("toast-area-hidden").addClass("toast-area-show");
               $('#toast-add-participant').children('.toast-header').children('strong').eq(0).empty().append(response.responseJSON.status).css({"color": "#721c24"});
               $('#toast-add-participant').children('.toast-header').children('svg').eq(0).css({'fill': '#f8d7da'});
               $('#toast-add-participant').children('.toast-body').eq(0).empty().append(response.responseJSON.message);
               $('#toast-add-participant').toast('show');
+              $('#toast-add-participant').on('hidden.bs.toast', function (){
+                $('#toast-area').removeClass("toast-area-show").addClass("toast-area-hidden");
+              });
 
             },
             success: function(response) {
@@ -81,20 +84,32 @@
               let list = document.getElementById('participantList');
 
               // create toast
-              // $('#toast-add-participant').children('.toast-header').eq(0).removeClass().addClass('toast-header toast-success');
+              $('#toast-area').removeClass("toast-area-hidden").addClass("toast-area-show");
               $('#toast-add-participant').children('.toast-header').children('strong').eq(0).empty().append(response.status).css({"color": "#155724"});
               $('#toast-add-participant').children('.toast-header').children('svg').eq(0).css({'fill': '#d4edda'});
               $('#toast-add-participant').children('.toast-body').eq(0).empty().append(response.message);
               $('#toast-add-participant').toast('show');
+              $('#toast-add-participant').on('hidden.bs.toast', function (){
+                $('#toast-area').removeClass("toast-area-show").addClass("toast-area-hidden");
+              });
 
               // append the + and - function to new participant
               $('#participantList').children().eq(i).after(response.htmlResponse);
               adjustQuantity();
+
+              $('#AddParticipantModal').modal('hide');
             }
           });
 
         });
 
+        $('#AddParticipantModal').on('shown.bs.modal', function () {
+          $('#AddParticipantModal').trigger('focus')
+        });
+
+        $('#addEventModal').on('shown.bs.modal', function () {
+          $('#addEventModal').trigger('focus')
+        });
 
       }); // end of document.ready
 
@@ -157,20 +172,38 @@
           .then(response => response.json())
           .then(data => {
             $('#total').val(data.total);
-            $('#payeeList').val(data.payee);
+            $('#payeeList')
+            .find('option')
+            .remove();
+
             $('#note').val(data.note);
             $('#participantList').children('.participant').remove();
             $('#participantList').prepend(data.htmlResponse);
             adjustQuantity();
-            for (p in data.pq) {
-              $(`#${p}`).val(data.pq[p]);
-            };
-            $('.submit-form-event').empty().append('Update');
+            if (jQuery.isEmptyObject(data.pq) == false){
+              for (p in data.pq) {
+                $(`#${p}-quantity`).val(data.pq[p]);
+              };
+            }
+            if (jQuery.isEmptyObject(data.pn) == false){
+              $('#payeeList').append('<option selected disabled hidden value="">Please select one</option>');
+              for (p in data.pn) {
+                $('#payeeList').append(`<option value="${p}">${data.pn[p]}</option>`);
+              }
+            }
+
+            if (data.payee != ""){
+              $('#payeeList').val(data.payee);
+            } else {
+              $('#payeeList').val("");
+            }
+
+            $('.submit-form-event').empty().append('<i class="fa fa-paper-plane" aria-hidden="true"></i> Update');
           });
         }
         else {
           $('#form_event').trigger('reset');
-          $('.submit-form-event').empty().append('Add');
+          $('.submit-form-event').empty().append('<i class="fa fa-plus-square" aria-hidden="true"></i> Add A Round');
         };
       };
 
@@ -200,7 +233,7 @@
         <div class="row">
           {% csrf_token %}
           <div class="col-lg-2 col-sm-2 col-2 ml-auto mr-0">
-            <button type="button" class="btn btn-drunk-primary" data-toggle="modal" data-target="#addEventModal">
+            <button type="button" class="btn btn-drunk-outline-primary" data-toggle="modal" data-target="#addEventModal">
               <i class="fa fa-plus" aria-hidden="true"></i><span class="sm-only"> Event</span>
             </button>
           </div>
@@ -224,7 +257,7 @@
             <select id="roundList" class="form-control" name="round">
               <option value=0 selected> + New Round</option>
               {% for round in rounds %}
-                <option value="{{ round.id }}">{{ round.order }}</option>
+                <option value="{{ round.id }}">Round {{ round.order }}</option>
               {% endfor %}
             </select>
           </div>
@@ -257,13 +290,15 @@
           {% endfor %}
           <div class="col-lg-6 col-sm-6 col-6" id='add-participant-button'>
             <div class="form-group" style="position: relative">
-              <button type="button" class="btn btn-drunk-primary" data-toggle="modal" data-target="#AddParticipantModal">
+              <button type="button" class="btn btn-drunk-outline-primary" data-toggle="modal" data-target="#AddParticipantModal">
                 <i class="fa fa-plus" aria-hidden="true"></i>
               </button>
             </div>
           </div>
         </div>
 
+        <div class="clearfix"></div>
+        <div class="clearfix"></div>
         <div class="clearfix"></div>
 
         <div class="form-group">
@@ -288,7 +323,12 @@
           <label>Note </label>
           <input id="note" type="text" class="form-control" placeholder="Note" name="note">
         </div>
-        <button type="submit" class="btn btn-primary submit-form-event">Add</button>
+        <div class="form-group d-flex justify-content-center">
+          <button type="submit" class="btn btn-drunk-primary submit-form-event">
+            <i class="fa fa-plus-square" aria-hidden="true"></i>
+            Add A Round
+          </button>
+        </div>
       </form>
 
     </div>
@@ -323,7 +363,7 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            <h4 class="modal-title" id="myModalLabel">Add New Participant</h4>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <form action="{% url 'shots:addParticipant' %}" method="post" id="Add-Participant-Form" name="Add-Participant-Form">
@@ -349,7 +389,7 @@
         </div>
       </div>
     </div>
-    <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center fixed-bottom" style="min-height: 200px;">
+    <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center fixed-bottom toast-area-hidden" style="min-height: 200px;" id="toast-area">
       <!-- Then put toasts within -->
       <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" id="toast-add-participant" data-delay="3000">
         <div class="toast-header">

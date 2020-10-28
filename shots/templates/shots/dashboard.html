@@ -15,6 +15,7 @@
     <!-- Optional theme -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+    <script src="https://use.fontawesome.com/fea871f00c.js"></script>
     <title>Drunk</title>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
@@ -35,7 +36,9 @@
           $('#dashboard-tbody-view').empty();
           $('#dashboard-tbody-view').append(data.response);
           $('#total-cost').empty();
-          $('#total-cost').html('Total Payment: ' + data.totalCost);
+          if (parseInt(data.totalCost) > 0){
+            $('#total-cost').html('Total Payment: ' + data.totalCost);
+          }
           $('#new-round-button').attr('href', {% url 'shots:index'%} + eventId);
 
         })
@@ -45,7 +48,7 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">
+      <a class="navbar-brand" href="../{{lastEvent.id}}">
         <img src="{% static 'assets/shot.png' %}" height="30" width="30">
       </a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,15 +57,16 @@
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item active"><a class="nav-link" href="dashboard/{{lastEvent.id}}">Balance Dashboard<span class="sr-only">(current)</span></a></li>
+          <li class="nav-item active"><a class="nav-link" href="#">Balance Dashboard<span class="sr-only">(current)</span></a></li>
           <li class="nav-item"><a class="nav-link" href="../{{lastEvent.id}}">Event Detail</a></li>
         </ul>
       </div>
     </nav>
+    <div class="clearfix"></div>
     <div class="row">
       <div class="col-0 col-sm-0 col-md-1 col-lg-3"></div>
       <div class="col-lg-6 col-sm-10 col-10">
-        <select id="event" name="event" class="form-control  ml-auto mr-0" style="width: 100%">
+        <select id="event" name="event" class="form-control ml-auto mr-0" style="width:auto;">
           {% for e in events %}
             {% if e.id == eventId %}
               <option value="{{e.id}}" selected>
@@ -93,15 +97,14 @@
     <div class="row">
       <div class="col-0 col-sm-0 col-md-1 col-lg-3"></div>
       <div class="col-lg-6 col-md-10 col-sm-12 col-12">
-        {% if totalCost != 0 %}
-          <div class="d-flex justify-content-center">
-            <span class="total-cost" id="total-cost">Total Payment: {{totalCost}}</span>
-          </div>
-          <div class="clearfix"></div>
-        {% endif %}
         <div class="d-flex justify-content-center">
-          <a id="new-round-button" class="btn btn-primary" href="{% url 'shots:index' %}{{eventId}}">
-            New Round
+          <span class="total-cost" id="total-cost"></span>
+        </div>
+        <div class="clearfix"></div>
+        <div class="d-flex justify-content-center">
+          <a id="new-round-button" class="btn btn-drunk-primary" href="{% url 'shots:index' %}{{eventId}}">
+            <i class="fa fa-rocket" aria-hidden="true"></i>
+            To The Event!
           </a>
         </div>
       </div>
