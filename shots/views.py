@@ -304,4 +304,4 @@ def getRoundDetail(request, roundId):
 
 
 def landingPage(request):
-    return render (request, 'shots/index2.html')
+    return render (request, 'shots/landingPage.html')
