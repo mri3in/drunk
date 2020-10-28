@@ -15,8 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse
+from django.conf import settings
+
+
+def staticView(request):
+    with open(str(settings.BASE_DIR)+"/index.html") as fp:
+        return HttpResponse(fp.read())
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('shots/', include("shots.urls"))
+    path('shots/', include("shots.urls")),
+    path('', staticView)
 ]
