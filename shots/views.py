@@ -247,19 +247,19 @@ def dashboard_table(request, eventId):
             balance = participantBalance[str(p.id)]
 
         html = '<tr><td name="name">' + p.name + '</td>'
-        html += '<td name="expense">' + str(expense) + '</td>'
-        html += '<td name="cost">' + str("{:.2f}".format(cost)) + '</td>'
+        html += '<td name="expense">' + f'{expense:,.2f}' + '</td>'
+        html += '<td name="cost">' + f'{cost:,.2f}' + '</td>'
         if int(balance) > 0:
-            html += '<td name="balance" class="positive-balance">' + str("{:.2f}".format(balance)) + '</td></tr>'
+            html += '<td name="balance" class="positive-balance">' + f'{balance:,.2f}' + '</td></tr>'
         elif int(balance) < 0:
-            html += '<td name="balance" class="negative-balance">' + str("{:.2f}".format(balance)) + '</td></tr>'
+            html += '<td name="balance" class="negative-balance">' + f'{balance:,.2f}' + '</td></tr>'
         else:
-            html += '<td name="balance">' + str("{:.2f}".format(balance)) + '</td></tr>'
+            html += '<td name="balance">' + f'{balance:,.2f}' + '</td></tr>'
         htmlResponse += html
 
     response = {
         'response': htmlResponse,
-        'totalCost' : totalCost
+        'totalCost' : f'{totalCost:,.2f}'
     }
     return JsonResponse(response)
 
