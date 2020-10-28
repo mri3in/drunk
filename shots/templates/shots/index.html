@@ -65,30 +65,36 @@
             method: "POST",
             dataType: "json",
             error: function (response) {
-              console.log(response)
+              // console.log(response);
+              // create toast
+              // $('#toast-add-participant').children('.toast-header').eq(0).removeClass().addClass('toast-header toast-error');
+              $('#toast-add-participant').children('.toast-header').children('strong').eq(0).empty().append(response.responseJSON.status).css({"color": "#721c24"});
+              $('#toast-add-participant').children('.toast-header').children('svg').eq(0).css({'fill': '#f8d7da'});
+              $('#toast-add-participant').children('.toast-body').eq(0).empty().append(response.responseJSON.message);
+              $('#toast-add-participant').toast('show');
+
             },
             success: function(response) {
-              console.log(response);
+              // console.log(response);
               let htmlResponse = $.parseHTML(response.htmlResponse);
-              let parser = new DOMParser();
-              let htmlResponse1 = response.htmlResponse;
-              let htmlResponse2 = parser.parseFromString(htmlResponse1, "text/html");
-              // let doc = parser.parseFromString(stringContainingXMLSource, "application/xml")
-              // let htmlResponse = response.htmlResponse;
-
-              console.log(htmlResponse);
-              console.log(response.htmlResponse);
               let i = document.getElementById('participantList').childElementCount - 2;
               let list = document.getElementById('participantList');
-              console.log(i);
-              // document.getElementById('participantList').children[i].innerHTML += htmlResponse;
-              $('#participantList').children().eq(i).after(htmlResponse1);
+
+              // create toast
+              // $('#toast-add-participant').children('.toast-header').eq(0).removeClass().addClass('toast-header toast-success');
+              $('#toast-add-participant').children('.toast-header').children('strong').eq(0).empty().append(response.status).css({"color": "#155724"});
+              $('#toast-add-participant').children('.toast-header').children('svg').eq(0).css({'fill': '#d4edda'});
+              $('#toast-add-participant').children('.toast-body').eq(0).empty().append(response.message);
+              $('#toast-add-participant').toast('show');
+
+              // append the + and - function to new participant
+              $('#participantList').children().eq(i).after(response.htmlResponse);
               adjustQuantity();
-              // list.appendChild(htmlResponse2);
             }
           });
 
         });
+
 
       }); // end of document.ready
 
@@ -153,13 +159,18 @@
             $('#total').val(data.total);
             $('#payeeList').val(data.payee);
             $('#note').val(data.note);
+            $('#participantList').children('.participant').remove();
+            $('#participantList').prepend(data.htmlResponse);
+            adjustQuantity();
             for (p in data.pq) {
               $(`#${p}`).val(data.pq[p]);
             };
+            $('.submit-form-event').empty().append('Update');
           });
         }
         else {
           $('#form_event').trigger('reset');
+          $('.submit-form-event').empty().append('Add');
         };
       };
 
@@ -176,7 +187,7 @@
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item active"><a class="nav-link" href="dashboard/{{lastEvent.id}}">Balance Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="dashboard/{{lastEvent.id}}">Balance Dashboard</a></li>
           <li class="nav-item active"><a class="nav-link" href="./{{lastEvent.id}}">Event Detail<span class="sr-only">(current)</span></a></li>
         </ul>
       </div>
@@ -222,7 +233,7 @@
 
         <div id="participantList" class="row">
           {% for participant in participants %}
-          <div class="col-lg-6 col-sm-6 col-6">
+          <div class="col-lg-6 col-sm-6 col-6 participant">
             <div class="form-group">
               <div class="input-group drunk">
                 <div class="col-lg-8 col-sm-8 col-6" style="display: flex; align-items: center">
@@ -244,9 +255,9 @@
             </div>
           </div>
           {% endfor %}
-          <div class="col-lg-6 col-sm-6 col-6">
-            <div class="form-group" style="position: relative" id="add-participant-button">
-              <button type="button" class="btn btn-drunk-primary stick-to-bottom" data-toggle="modal" data-target="#AddParticipantModal">
+          <div class="col-lg-6 col-sm-6 col-6" id='add-participant-button'>
+            <div class="form-group" style="position: relative">
+              <button type="button" class="btn btn-drunk-primary" data-toggle="modal" data-target="#AddParticipantModal">
                 <i class="fa fa-plus" aria-hidden="true"></i>
               </button>
             </div>
@@ -277,7 +288,7 @@
           <label>Note </label>
           <input id="note" type="text" class="form-control" placeholder="Note" name="note">
         </div>
-        <button type="submit" class="btn btn-primary">Add</button>
+        <button type="submit" class="btn btn-primary submit-form-event">Add</button>
       </form>
 
     </div>
@@ -335,6 +346,23 @@
               <button type="submit" class="btn btn-primary">Save changes</button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+    <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center fixed-bottom" style="min-height: 200px;">
+      <!-- Then put toasts within -->
+      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" id="toast-add-participant" data-delay="3000">
+        <div class="toast-header">
+          <svg width="20" height="20" class="rounded mr-2">
+            <rect width="20" height="20"/>
+          </svg>
+          <strong class="mr-auto">Success</strong>
+          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="toast-body">
+          Hello, world! This is a toast message.
         </div>
       </div>
     </div>

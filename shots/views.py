@@ -93,8 +93,6 @@ def addEvent(request):
         r.save()
         return HttpResponseRedirect(reverse("shots:index"))
 
-
-
 def addParticipant(request):
     message = {}
     htmlResponse = ''
@@ -119,19 +117,19 @@ def addParticipant(request):
 
             if Participant.objects.filter(name = str(nameForm)).count() == 0:
                 p = Participant(name = str(nameForm), nickname = str(nicknameForm), type = typeForm)
-                # p.save()
+                p.save()
                 if p not in participants:
                     participants.append(p)
 
-                htmlResponse = f"<div class='col-lg-6 col-sm-6 col-6'><div class='form-group'><div class='input-group drunk'><div class='col-lg-8 col-sm-8 col-6' style='display: flex; align-items: center'><span>{p.name}</span></div><span class='input-group-btn'><button type='button' class='quantity-left-minus btn btn-number'  data-type='minus' data-field='{p.name}-quantity'><i class='fa fa-minus drunk' aria-hidden='true'></i></button></span><input type='hidden' name='participant' value='{str(p.id)}'><input type='text' id='{p.name}-quantity' name='quantity-{str(p.id)}' class='form-control input-number participant-quantity' value='0' min='0' max='100'><span class='input-group-btn'><button type='button' class='quantity-right-plus btn btn-number' data-type='plus' data-field='{p.name}-quantity'><i class='fa fa-plus drunk' aria-hidden='true'></i></button></span></div></div></div>"
+                htmlResponse = f"<div class='col-lg-6 col-sm-6 col-6 participant'><div class='form-group'><div class='input-group drunk'><div class='col-lg-8 col-sm-8 col-6' style='display: flex; align-items: center'><span>{p.name}</span></div><span class='input-group-btn'><button type='button' class='quantity-left-minus btn btn-number'  data-type='minus' data-field='{p.name}-quantity'><i class='fa fa-minus drunk' aria-hidden='true'></i></button></span><input type='hidden' name='participant' value='{str(p.id)}'><input type='text' id='{p.name}-quantity' name='quantity-{str(p.id)}' class='form-control input-number participant-quantity' value='0' min='0' max='100'><span class='input-group-btn'><button type='button' class='quantity-right-plus btn btn-number' data-type='plus' data-field='{p.name}-quantity'><i class='fa fa-plus drunk' aria-hidden='true'></i></button></span></div></div></div>"
 
-                message['status'] = 'success'
+                message['status'] = 'Success'
                 message['message'] = f"{nameForm} is added successfully."
                 message['id'] = str(p.id)
                 message['name'] = str(p.name)
                 message['htmlResponse'] = htmlResponse
             else:
-                message['status'] = 'error'
+                message['status'] = 'Error'
                 message['message'] = f"{nameForm} exists."
                 # return JsonResponse({"nameForm": nameForm, "event":event.id, "message": message})
 
@@ -151,11 +149,14 @@ def addParticipant(request):
             if roundIdForm != 0:
                 r = Round.objects.get(pk=roundIdForm)
                 rp = RoundParticipant(round=r, participant=p, quantity=0)
-                # rp.save()
+                rp.save()
+            if message['status'] == 'Success':
+                return JsonResponse(message, status = 200)
+            else:
+                return JsonResponse(message, status = 400)
 
-            return JsonResponse(message, status = 200)
     except:
-        message['status'] = 'error'
+        message['status'] = 'Error'
         message['message'] = f"Unexpected error: {sys.exc_info()}"
         return JsonResponse(message, status = 400)
 
@@ -288,13 +289,19 @@ def getRoundDetail(request, roundId):
         # pq['payee-name'] = r.payee.name
         pq['note'] = r.note
         pq['pq'] = {}
+        htmlResponse = ''
 
         for rp in rpList:
+            htmlResponse += f"<div class='col-lg-6 col-sm-6 col-6 participant'><div class='form-group'><div class='input-group drunk'><div class='col-lg-8 col-sm-8 col-6' style='display: flex; align-items: center'><span>{rp.participant.name}</span></div><span class='input-group-btn'><button type='button' class='quantity-left-minus btn btn-number'  data-type='minus' data-field='{rp.participant.name}-quantity'><i class='fa fa-minus drunk' aria-hidden='true'></i></button></span><input type='hidden' name='participant' value='{str(rp.participant.id)}'><input type='text' id='{rp.participant.name}-quantity' name='quantity-{str(rp.participant.id)}' class='form-control input-number participant-quantity' value='0' min='0' max='100'><span class='input-group-btn'><button type='button' class='quantity-right-plus btn btn-number' data-type='plus' data-field='{rp.participant.name}-quantity'><i class='fa fa-plus drunk' aria-hidden='true'></i></button></span></div></div></div>"
+
+            pq['htmlResponse'] = htmlResponse
+
             p = str(rp.participant.name) + "-quantity"
             q = rp.quantity
             pq['pq'][str(p)] = q
+
         return JsonResponse(pq)
 
 
-def test(request):
-    return render (request, 'shots/test.html')
+def landingPage(request):
+    return render (request, 'shots/index2.html')

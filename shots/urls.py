@@ -14,7 +14,9 @@ urlpatterns = [
 
     # dashboard page
     path("dashboard/<int:eventId>", views.dashboard, name="dashboard"),
-    path("dashboard_table/<int:eventId>", views.dashboard_table, name="dashboard_table")
+    path("dashboard_table/<int:eventId>", views.dashboard_table, name="dashboard_table"),
 
     # , path("test", views.test, name="test")
+    # 1st page
+    path('landingPage', views.landingPage, name="landingPage")
 ]
