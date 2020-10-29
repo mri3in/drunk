@@ -227,80 +227,70 @@
     </nav>
 
     <div class="clearfix"></div>
-    <div class="row">
+    <div class="wrapper">
       <div class="col-0 col-sm-0 col-md-1 col-lg-3"></div>
       <form class="col-12 col-sm-12 col-md-10 col-lg-6" id="form_event" action="{% url 'shots:addRound' %}" method="post">
-        <div class="row">
-          {% csrf_token %}
-          <div class="col-lg-2 col-sm-2 col-2 ml-auto mr-0">
-            <button type="button" class="btn btn-drunk-outline-primary" data-toggle="modal" data-target="#addEventModal">
-              <i class="fa fa-plus" aria-hidden="true"></i><span class="sm-only"> Event</span>
-            </button>
-          </div>
-
-          <div class="col-lg-5 col-sm-10 col-10 mr-0">
-            <select id="eventList" class="form-control" name="event">
-              {% for event in events %}
-                {% if event == lastEvent %}
-                  <option value="{{ event.id }}" selected>{{ event.name }}</option>
-                {% else %}
-                  <option value="{{ event.id }}">{{ event.name }}</option>
-                {% endif %}
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-
-        <br>
-        <div class="row">
-          <div class="ml-auto mr-3">
-            <select id="roundList" class="form-control" name="round">
-              <option value=0 selected> + New Round</option>
-              {% for round in rounds %}
-                <option value="{{ round.id }}">Round {{ round.order }}</option>
-              {% endfor %}
-            </select>
-          </div>
+        {% csrf_token %}
+        <div class="d-flex justify-content-end">
+          <button type="button" class="btn btn-drunk-outline-primary" data-toggle="modal" data-target="#addEventModal">
+            <i class="fa fa-plus" aria-hidden="true"></i><span class="sm-only"> Event</span>
+          </button>
+          <select id="eventList" class="form-control" name="event">
+            {% for event in events %}
+              {% if event == lastEvent %}
+                <option value="{{ event.id }}" selected>{{ event.name }}</option>
+              {% else %}
+                <option value="{{ event.id }}">{{ event.name }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
         </div>
         <div class="clearfix"></div>
 
-        <div id="participantList" class="row">
-          {% for participant in participants %}
-          <div class="col-lg-6 col-sm-6 col-6 participant">
-            <div class="form-group">
-              <div class="input-group drunk">
-                <div class="col-lg-8 col-sm-8 col-6" style="display: flex; align-items: center">
-                  <span>{{ participant.name }}</span>
+        <div class="d-flex justify-content-end">
+          <select id="roundList" class="form-control" name="round">
+            <option value=0 selected> + New Round</option>
+            {% for round in rounds %}
+              <option value="{{ round.id }}">Round {{ round.order }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="clearfix"></div>
+        <div class="form-group">
+          <label>Participant </label>
+          <div id="participantList" class="row">
+            {% for participant in participants %}
+            <div class="col-lg-6 col-sm-6 col-6 participant">
+              <div class="form-group">
+                <div class="input-group drunk">
+                  <div class="col-lg-5 col-sm-6 col-12" style="display: flex; align-items: center">
+                    <span class="d-inline-block text-truncate">{{ participant.name }}</span>
+                  </div>
+                  <span class="input-group-btn">
+                    <button type="button" class="quantity-left-minus btn btn-number"  data-type="minus" data-field="{{ participant.name }}-quantity">
+                      <i class="fa fa-minus drunk" aria-hidden="true"></i>
+                    </button>
+                  </span>
+                  <input type="hidden" name="participant" value="{{ participant.id }}">
+                  <input type="text" id="{{ participant.name }}-quantity" name="quantity-{{ participant.id }}" class="form-control input-number participant-quantity" value="0" min="0" max="100">
+                  <span class="input-group-btn">
+                    <button type="button" class="quantity-right-plus btn btn-number" data-type="plus" data-field="{{ participant.name }}-quantity">
+                      <i class="fa fa-plus drunk" aria-hidden="true"></i>
+                    </button>
+                  </span>
                 </div>
-                <span class="input-group-btn">
-                  <button type="button" class="quantity-left-minus btn btn-number"  data-type="minus" data-field="{{ participant.name }}-quantity">
-                    <i class="fa fa-minus drunk" aria-hidden="true"></i>
-                  </button>
-                </span>
-                <input type="hidden" name="participant" value="{{ participant.id }}">
-                <input type="text" id="{{ participant.name }}-quantity" name="quantity-{{ participant.id }}" class="form-control input-number participant-quantity" value="0" min="0" max="100">
-                <span class="input-group-btn">
-                  <button type="button" class="quantity-right-plus btn btn-number" data-type="plus" data-field="{{ participant.name }}-quantity">
-                    <i class="fa fa-plus drunk" aria-hidden="true"></i>
-                  </button>
-                </span>
+              </div>
+            </div>
+            {% endfor %}
+            <div class="col-lg-6 col-sm-6 col-6" id='add-participant-button'>
+              <div class="form-group" style="position: relative">
+                <button type="button" class="btn btn-drunk-outline-primary" data-toggle="modal" data-target="#AddParticipantModal">
+                  <i class="fa fa-plus" aria-hidden="true"></i>
+                </button>
               </div>
             </div>
           </div>
-          {% endfor %}
-          <div class="col-lg-6 col-sm-6 col-6" id='add-participant-button'>
-            <div class="form-group" style="position: relative">
-              <button type="button" class="btn btn-drunk-outline-primary" data-toggle="modal" data-target="#AddParticipantModal">
-                <i class="fa fa-plus" aria-hidden="true"></i>
-              </button>
-            </div>
-          </div>
         </div>
-
-        <div class="clearfix"></div>
-        <div class="clearfix"></div>
-        <div class="clearfix"></div>
-
         <div class="form-group">
           <label>Payee </label>
           <select id="payeeList" class="form-control" name="payee">
