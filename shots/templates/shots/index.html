@@ -5,18 +5,19 @@
     <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    <link href="{% static 'drunk/style.css' %}" rel="stylesheet">
-    <!-- <link href="../../static/drunk/style.css" rel="stylesheet"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Optional theme -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
     <script src="https://use.fontawesome.com/fea871f00c.js"></script>
+    <script  type="text/javascript" src="{% static 'drunk/typeahead.jquery.js' %}"></script>
+    <link href="{% static 'drunk/style.css' %}" rel="stylesheet">
+    <!-- <link href="../../static/drunk/style.css" rel="stylesheet"> -->
+    <link href="{% static 'drunk/typeahead.css' %}" rel="stylesheet">
     <title>Drunk</title>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
@@ -110,6 +111,58 @@
         $('#addEventModal').on('shown.bs.modal', function () {
           $('#addEventModal').trigger('focus')
         });
+
+        // auto complete field
+        var substringMatcher = function(strs) {
+          return function findMatches(q, cb) {
+            var matches, substringRegex;
+
+            // an array that will be populated with substring matches
+            matches = [];
+
+            // regex used to determine if a string contains the substring `q`
+            substrRegex = new RegExp(q, 'i');
+
+            // iterate through the pool of strings and for any string that
+            // contains the substring `q`, add it to the `matches` array
+            $.each(strs, function(i, str) {
+              if (substrRegex.test(str)) {
+                matches.push(str);
+              }
+            });
+
+            cb(matches);
+          };
+        };
+
+        var states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
+          'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii',
+          'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
+          'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
+          'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
+          'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota',
+          'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
+          'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
+          'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
+        ];
+
+        $('#participantAutocomplete').typeahead({
+          hint: true,
+          highlight: true,
+          minLength: 1
+        },
+        {
+          name: 'states',
+          source: substringMatcher(states)
+        });
+        // end of auto complete field
+
+        addParticipantMethod($('#addingMethod').val());
+
+        $('#addingMethod').change(function () {
+          addParticipantMethod($(this).val());
+        });
+
 
       }); // end of document.ready
 
@@ -207,6 +260,20 @@
         };
       };
 
+      function addParticipantMethod (method) {
+        if (method == 0){ // existing participant
+          $('.existing-participant').show();
+          $('#participantAutocomplete').attr('required', 'required');
+          $('.new-participant').hide();
+          $('#participant-name').removeAttr('required');
+        }
+        else if (method == 1){
+          $('.existing-participant').hide();
+          $('#participantAutocomplete').removeAttr('required');
+          $('.new-participant').show();
+          $('#participant-name').attr('required', 'required');
+        }
+      }
     </script>
   </head>
   <body>
@@ -217,7 +284,6 @@
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item"><a class="nav-link" href="dashboard/{{lastEvent.id}}">Balance Dashboard</a></li>
@@ -342,7 +408,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Save changes</button>
+              <button type="submit" class="btn btn-drunk-primary">Create Event</button>
             </div>
           </form>
         </div>
@@ -359,21 +425,41 @@
           <form action="{% url 'shots:addParticipant' %}" method="post" id="Add-Participant-Form" name="Add-Participant-Form">
             {% csrf_token %}
             <div class="modal-body">
+              <div class="form-group">
+                <label for="addingMethod">Adding Method</label>
+                <select class="form-control" id="addingMethod">
+                  <option value="0" selected>Existing Participant</option>
+                  <option value="1">New Participant</option>
+                </select>
+              </div>
+              <div class="form-group existing-participant">
+                <label for="participant-name" class="control-label">Name:</label>
+                <div class="clearfix"></div>
                 <div class="form-group">
-                  <label for="participant-name" class="control-label">Name:</label>
-                  <input type="text" class="form-control" id="participant-name" name="participant-name" required>
-                  <label for="participant-nickname" class="control-label">Nickname:</label>
-                  <input type="text" class="form-control" id="participant-nickname" name="participant-nickname">
-                  <label for="participant-type" class="control-label">Frequent Member?:</label>
-                  <input type="checkbox" id="participant-type" name="participant-type" value="True">
-                  <span>Yes</span>
-                  <input type="text" hidden id="participant-round-id" name="round-id" value="1">
-                  <input type="text" hidden id="participant-event-id" name="event-id" value="1">
+                  <input type="text" class="form-control typeahead" id="participantAutocomplete" placeholder="Name of participant" required>
                 </div>
+              </div>
+              <div class="form-group new-participant">
+                <label for="participant-name" class="control-label">Name:</label>
+                <input type="text" class="form-control" id="participant-name" name="participant-name" required>
+              </div>
+              <div class="form-group new-participant">
+                <label for="participant-nickname" class="control-label">Nickname:</label>
+                <input type="text" class="form-control" id="participant-nickname" name="participant-nickname">
+              </div>
+              <div class="form-group new-participant">
+                <label for="participant-type" class="control-label">Frequent Member?:</label>
+                <input type="checkbox" id="participant-type" name="participant-type" value="True">
+                <span>Yes</span>
+              </div>
+              <div class="form-group" hidden>
+                <input type="text" id="participant-round-id" name="round-id" value="1">
+                <input type="text" id="participant-event-id" name="event-id" value="1">
+              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Save changes</button>
+              <button type="submit" class="btn btn-drunk-primary">Add Participant</button>
             </div>
           </form>
         </div>
@@ -396,5 +482,29 @@
         </div>
       </div>
     </div>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+         https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-analytics.js"></script>
+
+    <script>
+      // Your web app's Firebase configuration
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      var firebaseConfig = {
+        apiKey: "AIzaSyAsLwZ1xCPtys7B0SFDdshyd3e5vRqUdmI",
+        authDomain: "thelab-2020.firebaseapp.com",
+        databaseURL: "https://thelab-2020.firebaseio.com",
+        projectId: "thelab-2020",
+        storageBucket: "thelab-2020.appspot.com",
+        messagingSenderId: "321121171978",
+        appId: "1:321121171978:web:843f721ca5e822678dfdf3",
+        measurementId: "G-749PSJ1QJ4"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+    </script>
   </body>
 </html>

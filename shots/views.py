@@ -18,20 +18,14 @@ def index(request, **kwarg):
     if rounds:
         for round in rounds:
             rpList = RoundParticipant.objects.filter(round=round.id)
-            # print(f"round: {round}")
-            # print(f"rpList: {rpList}")
             for rp in rpList:
-                # print(f"roundparticipant : {rp}")
                 if rp.participant not in participants:
                     participants.append(rp.participant)
     if not participants:
         pList = Participant.objects.filter(type = 1)
         for p in pList:
             participants.append(p)
-    # print("---------")
-    # print(f"participants: {participants}")
-    # print(f"lastEvent: {lastEvent}")
-    # print(f"rounds: {rounds}")
+
     return render(request, 'shots/index.html', {
         "lastEvent": lastEvent,
         "participants": participants,
@@ -299,7 +293,7 @@ def getRoundDetail(request, roundId):
             if r.event.id == lastEvent.id:
                 pList = Participant.objects.filter(type = 1)
                 for p in pList:
-                    htmlResponse += f"<div class='col-lg-6 col-sm-6 col-6 participant'><div class='form-group'><div class='input-group drunk'><div class='col-lg-8 col-sm-8 col-6' style='display: flex; align-items: center'><span>{p.name}</span></div><span class='input-group-btn'><button type='button' class='quantity-left-minus btn btn-number'  data-type='minus' data-field='{p.name}-quantity'><i class='fa fa-minus drunk' aria-hidden='true'></i></button></span><input type='hidden' name='participant' value='{str(p.id)}'><input type='text' id='{p.name}-quantity' name='quantity-{str(p.id)}' class='form-control input-number participant-quantity' value='0' min='0' max='100'><span class='input-group-btn'><button type='button' class='quantity-right-plus btn btn-number' data-type='plus' data-field='{p.name}-quantity'><i class='fa fa-plus drunk' aria-hidden='true'></i></button></span></div></div></div>"
+                    htmlResponse += f"<div class='col-lg-6 col-sm-6 col-6 participant'><div class='form-group'><div class='input-group drunk'><div class='col-lg-5 col-sm-6 col-12' style='display: flex; align-items: center'><span class='d-inline-block text-truncate'>{p.name}</span></div><span class='input-group-btn'><button type='button' class='quantity-left-minus btn btn-number'  data-type='minus' data-field='{p.name}-quantity'><i class='fa fa-minus drunk' aria-hidden='true'></i></button></span><input type='hidden' name='participant' value='{str(p.id)}'><input type='text' id='{p.name}-quantity' name='quantity-{str(p.id)}' class='form-control input-number participant-quantity' value='0' min='0' max='100'><span class='input-group-btn'><button type='button' class='quantity-right-plus btn btn-number' data-type='plus' data-field='{p.name}-quantity'><i class='fa fa-plus drunk' aria-hidden='true'></i></button></span></div></div></div>"
 
                     pq['htmlResponse'] = htmlResponse
                     id = str(p.id)
@@ -309,7 +303,7 @@ def getRoundDetail(request, roundId):
 
         else:
             for rp in rpList:
-                htmlResponse += f"<div class='col-lg-6 col-sm-6 col-6 participant'><div class='form-group'><div class='input-group drunk'><div class='col-lg-8 col-sm-8 col-6' style='display: flex; align-items: center'><span>{rp.participant.name}</span></div><span class='input-group-btn'><button type='button' class='quantity-left-minus btn btn-number'  data-type='minus' data-field='{rp.participant.name}-quantity'><i class='fa fa-minus drunk' aria-hidden='true'></i></button></span><input type='hidden' name='participant' value='{str(rp.participant.id)}'><input type='text' id='{rp.participant.name}-quantity' name='quantity-{str(rp.participant.id)}' class='form-control input-number participant-quantity' value='0' min='0' max='100'><span class='input-group-btn'><button type='button' class='quantity-right-plus btn btn-number' data-type='plus' data-field='{rp.participant.name}-quantity'><i class='fa fa-plus drunk' aria-hidden='true'></i></button></span></div></div></div>"
+                htmlResponse += f"<div class='col-lg-6 col-sm-6 col-6 participant'><div class='form-group'><div class='input-group drunk'><div class='col-lg-5 col-sm-6 col-12' style='display: flex; align-items: center'><span class='d-inline-block text-truncate'>{rp.participant.name}</span></div><span class='input-group-btn'><button type='button' class='quantity-left-minus btn btn-number'  data-type='minus' data-field='{rp.participant.name}-quantity'><i class='fa fa-minus drunk' aria-hidden='true'></i></button></span><input type='hidden' name='participant' value='{str(rp.participant.id)}'><input type='text' id='{rp.participant.name}-quantity' name='quantity-{str(rp.participant.id)}' class='form-control input-number participant-quantity' value='0' min='0' max='100'><span class='input-group-btn'><button type='button' class='quantity-right-plus btn btn-number' data-type='plus' data-field='{rp.participant.name}-quantity'><i class='fa fa-plus drunk' aria-hidden='true'></i></button></span></div></div></div>"
 
                 pq['htmlResponse'] = htmlResponse
                 id = str(rp.participant.id)
