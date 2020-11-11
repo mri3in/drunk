@@ -1,0 +1,43 @@
+#login-password {
+  opacity: 0.02;
+  width: 200px;
+  top: 20%;
+  left: 15%;
+  right: 15%;
+  position: absolute;
+  z-index: 1100;
+}
+
+.wrapper-login {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  margin: auto;
+  overflow-x: hidden;
+}
+
+#img_hiclipart {
+  position: absolute;
+  width: 650px;
+  height: 650px;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 1;
+  filter: blur(5px);
+}
+
+.login-body {
+  background: linear-gradient(180deg, #B82A6E 0%, #3B1F74 100%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+@media (max-width: 575.98px) {
+  #img_404 {
+    width: 100%;
+    height: auto;
+  }
+}

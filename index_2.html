@@ -1,11 +1,10 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en" >
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- <link href="https://mri3in.github.io/drunk/shots/static/drunk/homeStyle.css" rel="stylesheet"> -->
-    <link href="{% static 'drunk/homeStyle.css' %}" rel="stylesheet">
+    <link href="https://mri3in.github.io/drunk/shots/static/drunk/homeStyle.css" rel="stylesheet">
+    <!-- <link href="{% static 'drunk/homeStyle.css' %}" rel="stylesheet"> -->
 
     <!-- <script src="../../static/drunk/jquery-3.5.1.min.js"></script>
     <link href="../../static/drunk/bootstrap.min.css" rel="stylesheet">
@@ -23,8 +22,11 @@
     <script>
       $(function (){
         var hint = "";
-        // var textUrl = "https://mri3in.github.io/drunk/shots/static/assets/text.txt";
-        var textUrl = "{% static 'assets/text.txt' %}"
+        var textUrl = "https://mri3in.github.io/drunk/shots/static/assets/text.txt";
+
+        // if (window.location.href == 'https://mri3in.github.io/drunk/'){
+        //   textUrl = "/drunk/shots/static/assets/text.txt"
+        // };
 
         $.get(textUrl, function(data) {
           // console.log(data);
@@ -33,15 +35,14 @@
 
         $('#login-password').change(function (){
           if ($(this).val().toLowerCase() == hint.trim()) {
-            // document.location.href = 'shots';
-            document.location.href = '/shots';
+            document.location.href = 'shots';
           };
         });
 
       });
 
     </script>
-    <link rel="icon" type="image/png" href="{% static 'assets/shot.png' %}">
+    <link rel="icon" type="image/png" href="https://mri3in.github.io/drunk/shots/static/assets/shot.png">
 
     <title>Drunk</title>
   </head>
@@ -57,6 +58,6 @@
     <!-- TODO: Add SDKs for Firebase products that you want to use
          https://firebase.google.com/docs/web/setup#available-libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-analytics.js"></script>
-    <script src="{% static 'drunk/firebase.js' %}"></script>
+    <script src="shots/static/drunk/firebase.js"></script>
   </body>
 </html>

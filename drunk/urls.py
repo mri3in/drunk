@@ -20,7 +20,7 @@ from django.conf import settings
 
 
 def staticView(request):
-    with open(str(settings.BASE_DIR)+"/index.html") as fp:
+    with open(str(settings.BASE_DIR)+"/index_2.html") as fp:
         return HttpResponse(fp.read())
 
 urlpatterns = [
