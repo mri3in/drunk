@@ -119,9 +119,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_ROOT = 'static'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
-
+if not DEBUG:
+    STATIC_URL = 'https://github.com/mri3in/drunk/blob/main/static/'
+# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static')
 
 SESSION_COOKIE_SECURE = True
 
@@ -134,3 +136,5 @@ SECURE_HSTS_SECONDS = 3600
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
 SECURE_HSTS_PRELOAD = True
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
