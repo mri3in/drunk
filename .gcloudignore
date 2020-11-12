@@ -17,3 +17,6 @@
 __pycache__/
 # Ignored by the build system
 /setup.cfg
+
+# personal note
+deployment-note.md
