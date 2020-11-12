@@ -17,14 +17,10 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
 from django.conf import settings
-
-
-def staticView(request):
-    with open(str(settings.BASE_DIR)+"/index_2.html") as fp:
-        return HttpResponse(fp.read())
+from shots import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('shots/', include("shots.urls")),
-    path('', staticView)
+    path('', views.landingPage)
 ]
