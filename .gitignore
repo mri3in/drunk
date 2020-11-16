@@ -134,3 +134,4 @@ deployment-note.md
 random.py
 .dockerignore
 CORS.json
+firebase.json

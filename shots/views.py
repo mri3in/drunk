@@ -22,15 +22,19 @@ def generateSigner():
 
 
 def isAuthenticated (request):
+    # print(request.session['drinker'] != generateSigner())
+    # print(request.session['drinker'])
+    print('drinker' in request.session)
     if 'drinker' in request.session:
         if request.session['drinker'] != generateSigner():
-            return HttpResponseRedirect(reverse(""))
+            return True
     else:
-        return HttpResponseRedirect(reverse(""))
+        return False
 
 
 def index(request, **kwarg):
-    isAuthenticated (request)
+    if not isAuthenticated (request):
+        return HttpResponseRedirect(reverse("404_drunk"))
     lastEvent = None
     participants = []
     currentParticipant = []
@@ -241,7 +245,8 @@ def calculateBalance(event_id):
 
 
 def dashboard(request, eventId=0):
-    isAuthenticated (request)
+    if not isAuthenticated (request):
+        return HttpResponseRedirect(reverse("404_drunk"))
     events = None
     participantQuantity = None
     participantCost = None

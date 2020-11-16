@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY_DRUNK')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-# DEBUG = False
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -126,6 +126,8 @@ USE_TZ = True
 
 STATIC_ROOT = 'static'
 STATIC_URL = '/static/'
+# STATIC_URL = os.environ.get('STATIC_URL_DRUNK')
+
 if not DEBUG:
     STATIC_URL = os.environ.get('STATIC_URL_DRUNK')
     # STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static')

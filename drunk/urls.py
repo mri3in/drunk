@@ -22,5 +22,5 @@ from shots import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('shots/', include("shots.urls")),
-    path('', views.landingPage)
+    path('', views.landingPage, name='404_drunk')
 ]
