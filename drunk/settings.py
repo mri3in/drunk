@@ -127,7 +127,7 @@ USE_TZ = True
 STATIC_ROOT = 'static'
 STATIC_URL = '/static/'
 if not DEBUG:
-    STATIC_URL = 'https://storage.googleapis.com/thelabdrinking/static/'
+    STATIC_URL = os.environ.get('STATIC_URL_DRUNK')
     # STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -136,3 +136,4 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS')

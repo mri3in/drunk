@@ -19,5 +19,7 @@ urlpatterns = [
     path("dashboard_table/<int:eventId>", views.dashboard_table, name="dashboard_table"),
 
     # 1st page
-    path('landingPage', views.landingPage, name="landingPage")
+    path('landingPage', views.landingPage, name="landingPage"),
+    path('getHint/<str:hint>', views.getHint, name="get_hint"),
+    path('getHint/', views.getHint, name="get_hint_empty")
 ]

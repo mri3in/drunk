@@ -22,20 +22,14 @@
     <script src="https://use.fontawesome.com/fea871f00c.js"></script>
     <script>
       $(function (){
-        var hint = "";
-        // var textUrl = "https://mri3in.github.io/drunk/shots/static/assets/text.txt";
-        var textUrl = "{% static 'assets/text.txt' %}"
-
-        $.get(textUrl, function(data) {
-          // console.log(data);
-          hint = data;
-        });
-
-        $('#login-password').change(function (){
-          if ($(this).val().toLowerCase() == hint.trim()) {
-            // document.location.href = 'shots';
-            document.location.href = '/shots';
-          };
+        $('#login-password').on('input', function (){
+          let hint = $(this).val().toLowerCase();
+          fetch(`shots/getHint/${hint}`, { method: 'GET', redirect: 'follow'})
+            .then(response => {
+              if (response.redirected) {
+                window.location.href = response.url;
+              }
+            });
         });
 
       });

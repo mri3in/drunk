@@ -1,13 +1,36 @@
 from django.shortcuts import render
 from .models import *
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.urls import reverse
 from datetime import date
 from django.http import HttpResponse, JsonResponse
-import sys
+import sys, os
+from django.conf import settings
+from django.core.signing import Signer
+from html import unescape
 
 # Create your views here.
+def generateSigner():
+    signer = Signer(salt='drunk')
+    value = None
+
+    with open(os.path.join(settings.STATIC_ROOT, 'assets/text.txt'), "r") as f:
+        hint = f.readline()
+        value = signer.sign(hint.rstrip())
+
+    return value
+
+
+def isAuthenticated (request):
+    if 'drinker' in request.session:
+        if request.session['drinker'] != generateSigner():
+            return HttpResponseRedirect(reverse(""))
+    else:
+        return HttpResponseRedirect(reverse(""))
+
+
 def index(request, **kwarg):
+    isAuthenticated (request)
     lastEvent = None
     participants = []
     currentParticipant = []
@@ -103,6 +126,7 @@ def addEvent(request):
         r.save()
         return HttpResponseRedirect(reverse("shots:index"))
 
+
 def addParticipant(request):
     message = {}
     htmlResponse = ''
@@ -170,6 +194,7 @@ def addParticipant(request):
         message['message'] = f"Unexpected error: {sys.exc_info()}"
         return JsonResponse(message, status = 400)
 
+
 def calculateBalance(event_id):
     e = Event.objects.get(id=event_id)
     if e:
@@ -216,6 +241,7 @@ def calculateBalance(event_id):
 
 
 def dashboard(request, eventId=0):
+    isAuthenticated (request)
     events = None
     participantQuantity = None
     participantCost = None
@@ -295,6 +321,7 @@ def dashboard_table(request, eventId=0):
         'totalCost' : f'{totalCost:,.2f}'
     })
 
+
 def getRoundList(request, eventId):
     rounds = Round.objects.filter(event = eventId).order_by('-order')
     lastEvent = Event.objects.order_by('-id')[0]
@@ -353,4 +380,19 @@ def getRoundDetail(request, roundId):
 
 
 def landingPage(request):
+    if 'drinker' in request.session:
+        if request.session['drinker'] == generateSigner():
+            return HttpResponseRedirect(reverse("shots:index"))
     return render (request, 'shots/landingPage.html')
+
+def getHint(request, hint=""):
+    escapedHint = unescape(hint)
+    result = None
+
+    with open(os.path.join(settings.STATIC_ROOT, 'assets/text.txt'), "r") as f:
+        result = f.readline().rstrip()
+
+    if hint == result:
+        request.session['drinker'] = generateSigner()
+        return HttpResponsePermanentRedirect(reverse("shots:index"))
+    return HttpResponse(hint)
