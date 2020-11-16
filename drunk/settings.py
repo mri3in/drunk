@@ -26,8 +26,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY_DRUNK')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+# DEBUG = False
 
-# ALLOWED_HOSTS = ["https://thelab-2020.web.app/"]
 ALLOWED_HOSTS = ["*"]
 
 # Application definition
@@ -76,10 +76,14 @@ WSGI_APPLICATION = 'drunk.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+databaseName = os.environ.get('DJANGO_DB_NAME_DRUNK')
+if DEBUG:
+    databaseName = os.environ.get('DJANGO_DB_NAME_DRUNK_DEBUG')
+
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get('DJANGO_DB_ENGINE_DRUNK'),
-        'NAME': os.environ.get('DJANGO_DB_NAME_DRUNK'),
+        'NAME': databaseName,
     }
 }
 
@@ -124,18 +128,11 @@ STATIC_ROOT = 'static'
 STATIC_URL = '/static/'
 if not DEBUG:
     STATIC_URL = 'https://storage.googleapis.com/thelabdrinking/static/'
-# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static')
-
+    # STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static')
     SESSION_COOKIE_SECURE = True
-
     CSRF_COOKIE_SECURE = True
-
     SECURE_SSL_REDIRECT = True
-
     SECURE_HSTS_SECONDS = 3600
-
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-
     SECURE_HSTS_PRELOAD = True
-
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

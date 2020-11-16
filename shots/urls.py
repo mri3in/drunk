@@ -13,10 +13,11 @@ urlpatterns = [
     path("getRoundDetail/<int:roundId>", views.getRoundDetail, name="get_round_detail"),
 
     # dashboard page
+    path("dashboard/", views.dashboard, name="dashboard_empty"),
     path("dashboard/<int:eventId>", views.dashboard, name="dashboard"),
+    path("dashboard_table/", views.dashboard_table, name="dashboard_table_empty"),
     path("dashboard_table/<int:eventId>", views.dashboard_table, name="dashboard_table"),
 
-    # , path("test", views.test, name="test")
     # 1st page
     path('landingPage', views.landingPage, name="landingPage")
 ]

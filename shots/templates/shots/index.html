@@ -42,6 +42,7 @@
 
         $('#add-participant-button').height(document.getElementById('participantList').children[0].children[0].clientHeight);
 
+        // add a new participant
         $('#Add-Participant-Form').submit(function (event) {
           // Stop form from submitting normally
           event.preventDefault();
@@ -136,26 +137,21 @@
           };
         };
 
-        var states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
-          'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii',
-          'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
-          'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
-          'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
-          'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota',
-          'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
-          'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-          'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
-        ];
+        {% autoescape off %}
+        var currentParticipant = {{currentParticipant}};
+        {% endautoescape %}
 
-        $('#participantAutocomplete').typeahead({
-          hint: true,
-          highlight: true,
-          minLength: 1
-        },
-        {
-          name: 'states',
-          source: substringMatcher(states)
-        });
+        $('#participantAutocomplete').typeahead(
+          {
+            hint: true,
+            highlight: true,
+            minLength: 1
+          },
+          {
+            name: 'currentParticipant',
+            source: substringMatcher(currentParticipant)
+          }
+        );
         // end of auto complete field
 
         addParticipantMethod($('#addingMethod').val());
@@ -164,6 +160,7 @@
           addParticipantMethod($(this).val());
         });
 
+        checkFirstEvent();
 
       }); // end of document.ready
 
@@ -275,6 +272,12 @@
           $('#participant-name').attr('required', 'required');
         }
       }
+
+      function checkFirstEvent() {
+        if ($('#eventList option').length == 0){
+          $('#addEventModal').modal('show');
+        }
+      }
     </script>
   </head>
   <body>
@@ -287,8 +290,12 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item"><a class="nav-link" href="dashboard/{{lastEvent.id}}">Balance Dashboard</a></li>
-          <li class="nav-item active"><a class="nav-link" href="./{{lastEvent.id}}">Event Detail<span class="sr-only">(current)</span></a></li>
+          {% if lastEvent %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'shots:dashboard' lastEvent.id %}">Balance Dashboard</a></li>
+          {% else %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'shots:dashboard_empty' %}">Balance Dashboard</a></li>
+          {% endif %}
+          <li class="nav-item active"><a class="nav-link" href="{% url 'shots:index' %}">Event Detail<span class="sr-only">(current)</span></a></li>
         </ul>
       </div>
     </nav>
@@ -428,7 +435,7 @@
             <div class="modal-body">
               <div class="form-group">
                 <label for="addingMethod">Adding Method</label>
-                <select class="form-control" id="addingMethod">
+                <select class="form-control" id="addingMethod" name="adding-method">
                   <option value="0" selected>Existing Participant</option>
                   <option value="1">New Participant</option>
                 </select>
@@ -437,7 +444,7 @@
                 <label for="participant-name" class="control-label">Name:</label>
                 <div class="clearfix"></div>
                 <div class="form-group">
-                  <input type="text" class="form-control typeahead" id="participantAutocomplete" placeholder="Name of participant" required>
+                  <input type="text" class="form-control typeahead" id="participantAutocomplete" name="current-participant-name" placeholder="Name of participant" required>
                 </div>
               </div>
               <div class="form-group new-participant">

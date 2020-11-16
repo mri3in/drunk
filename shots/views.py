@@ -8,29 +8,45 @@ import sys
 
 # Create your views here.
 def index(request, **kwarg):
+    lastEvent = None
+    participants = []
+    currentParticipant = []
+    events = None
+    rounds = None
+
     if kwarg:
         lastEvent = Event.objects.get(pk=int(kwarg['eventId']))
     else:
-        lastEvent = Event.objects.order_by('-id')[0]
-    events = Event.objects.order_by('-id')
-    rounds = lastEvent.rounds.order_by('-order')
-    participants = []
-    if rounds:
-        for round in rounds:
-            rpList = RoundParticipant.objects.filter(round=round.id)
-            for rp in rpList:
-                if rp.participant not in participants:
-                    participants.append(rp.participant)
+        if Event.objects.order_by('-id'):
+            lastEvent = Event.objects.order_by('-id')[0]
+
+    if lastEvent:
+        events = Event.objects.order_by('-id')
+        rounds = lastEvent.rounds.order_by('-order')
+
+        if rounds:
+            for round in rounds:
+                rpList = RoundParticipant.objects.filter(round=round.id)
+                for rp in rpList:
+                    if rp.participant not in participants:
+                        participants.append(rp.participant)
+
     if not participants:
-        pList = Participant.objects.filter(type = 1)
-        for p in pList:
-            participants.append(p)
+        if Participant.objects.filter(type = 1):
+            pList = Participant.objects.filter(type = 1)
+            for p in pList:
+                participants.append(p)
+
+    if Participant.objects.order_by('name'):
+        for p in Participant.objects.order_by('name'):
+            currentParticipant.append(str(p.name))
 
     return render(request, 'shots/index.html', {
         "lastEvent": lastEvent,
         "participants": participants,
         "events": events,
         "rounds": rounds,
+        "currentParticipant": currentParticipant,
     })
 
 
@@ -199,13 +215,26 @@ def calculateBalance(event_id):
         return participantQuantity, participantCost, participantExpense, participantBalance, totalCost
 
 
-def dashboard(request, eventId):
-    events = Event.objects.order_by('-id')
-    participantQuantity, participantCost, participantExpense, participantBalance, totalCost = calculateBalance(eventId)
+def dashboard(request, eventId=0):
+    events = None
+    participantQuantity = None
+    participantCost = None
+    participantExpense = None
+    participantBalance = None
+    totalCost = None
     participants = []
-    for key in participantQuantity:
-        p = Participant.objects.get(pk=int(key))
-        participants.append(p)
+
+    if eventId != 0:
+        participantQuantity, participantCost, participantExpense, participantBalance, totalCost = calculateBalance(eventId)
+
+        if Event.objects.order_by('-id'):
+            events = Event.objects.order_by('-id')
+
+        if participantQuantity:
+            for key in participantQuantity:
+                p = Participant.objects.get(pk=int(key))
+                participants.append(p)
+
     return render(request, 'shots/dashboard.html', {
         "eventId": eventId,
         "events": events,
@@ -218,45 +247,53 @@ def dashboard(request, eventId):
     })
 
 
-def dashboard_table(request, eventId):
-    participantQuantity, participantCost, participantExpense, participantBalance, totalCost = calculateBalance(eventId)
+def dashboard_table(request, eventId=0):
+    participantQuantity = None
+    participantCost = None
+    participantExpense = None
+    participantBalance = None
+    totalCost = 0
     participants = []
+    htmlResponse = '<tr><td name="name"></td><td name="expense"></td><td name="cost"></td><td name="balance"></td></tr>'
 
-    for key in participantQuantity:
-        p = Participant.objects.get(pk=int(key))
-        participants.append(p)
-    # print(participants)
-    htmlResponse = ''
+    if eventId != 0:
+        participantQuantity, participantCost, participantExpense, participantBalance, totalCost = calculateBalance(eventId)
 
-    for p in participants:
-        expense = 0
-        cost = 0
-        balance = 0
-        if str(p.id) in participantExpense:
-            expense = participantExpense[str(p.id)]
-            # print(f"payee id : {p.id}, expense : {expense}")
-        if str(p.id) in participantCost:
-            cost = participantCost[str(p.id)]
-        if str(p.id) in participantBalance:
-            balance = participantBalance[str(p.id)]
+        for key in participantQuantity:
+            p = Participant.objects.get(pk=int(key))
+            participants.append(p)
 
-        html = '<tr><td name="name">' + p.name + '</td>'
-        html += '<td name="expense">' + f'{expense:,.2f}' + '</td>'
-        html += '<td name="cost">' + f'{cost:,.2f}' + '</td>'
-        if int(balance) > 0:
-            html += '<td name="balance" class="positive-balance">' + f'{balance:,.2f}' + '</td></tr>'
-        elif int(balance) < 0:
-            html += '<td name="balance" class="negative-balance">' + f'{balance:,.2f}' + '</td></tr>'
-        else:
-            html += '<td name="balance">' + f'{balance:,.2f}' + '</td></tr>'
-        htmlResponse += html
+        htmlResponse = ''
 
-    response = {
+        for p in participants:
+            expense = 0
+            cost = 0
+            balance = 0
+
+            if str(p.id) in participantExpense:
+                expense = participantExpense[str(p.id)]
+            if str(p.id) in participantCost:
+                cost = participantCost[str(p.id)]
+            if str(p.id) in participantBalance:
+                balance = participantBalance[str(p.id)]
+
+            html = '<tr><td name="name">' + p.name + '</td>'
+            html += '<td name="expense">' + f'{expense:,.2f}' + '</td>'
+            html += '<td name="cost">' + f'{cost:,.2f}' + '</td>'
+
+            if int(balance) > 0:
+                html += '<td name="balance" class="positive-balance">' + f'{balance:,.2f}' + '</td></tr>'
+            elif int(balance) < 0:
+                html += '<td name="balance" class="negative-balance">' + f'{balance:,.2f}' + '</td></tr>'
+            else:
+                html += '<td name="balance">' + f'{balance:,.2f}' + '</td></tr>'
+
+            htmlResponse += html
+
+    return JsonResponse({
         'response': htmlResponse,
         'totalCost' : f'{totalCost:,.2f}'
-    }
-    return JsonResponse(response)
-
+    })
 
 def getRoundList(request, eventId):
     rounds = Round.objects.filter(event = eventId).order_by('-order')
