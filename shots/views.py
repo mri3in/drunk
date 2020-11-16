@@ -8,6 +8,7 @@ import sys, os
 from django.conf import settings
 from django.core.signing import Signer
 from html import unescape
+from urllib.request import urlopen
 
 # Create your views here.
 def generateSigner():
@@ -22,12 +23,11 @@ def generateSigner():
 
 
 def isAuthenticated (request):
-    # print(request.session['drinker'] != generateSigner())
-    # print(request.session['drinker'])
-    print('drinker' in request.session)
     if 'drinker' in request.session:
-        if request.session['drinker'] != generateSigner():
+        if request.session['drinker'] == generateSigner():
             return True
+        else:
+            return False
     else:
         return False
 
@@ -390,12 +390,13 @@ def landingPage(request):
             return HttpResponseRedirect(reverse("shots:index"))
     return render (request, 'shots/landingPage.html')
 
+
 def getHint(request, hint=""):
     escapedHint = unescape(hint)
     result = None
 
-    with open(os.path.join(settings.STATIC_ROOT, 'assets/text.txt'), "r") as f:
-        result = f.readline().rstrip()
+    with urlopen(os.path.join(settings.STATIC_URL, 'assets/text.txt')) as f:
+        result = f.readline().decode("utf-8").rstrip()
 
     if hint == result:
         request.session['drinker'] = generateSigner()

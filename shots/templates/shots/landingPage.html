@@ -24,7 +24,7 @@
       $(function (){
         $('#login-password').on('input', function (){
           let hint = $(this).val().toLowerCase();
-          fetch(`shots/getHint/${hint}`, { method: 'GET', redirect: 'follow'})
+          fetch(`shots/getHint/${hint}`, { method: 'GET'})
             .then(response => {
               if (response.redirected) {
                 window.location.href = response.url;

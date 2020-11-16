@@ -133,5 +133,6 @@ dmypy.json
 deployment-note.md
 random.py
 .dockerignore
+.gcloudignore
 CORS.json
 firebase.json
