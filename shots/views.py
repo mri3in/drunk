@@ -15,7 +15,7 @@ def generateSigner():
     signer = Signer(salt='drunk')
     value = None
 
-    with open(os.path.join(settings.STATIC_ROOT, 'assets/text.txt'), "r") as f:
+    with urlopen(os.path.join(settings.STATIC_URL, 'assets/text.txt')) as f:
         hint = f.readline()
         value = signer.sign(hint.rstrip())
 
@@ -119,16 +119,18 @@ def addRound(request):
 def addEvent(request):
     if request.method == "POST":
         eventName = request.POST["event-name"].strip()
-        if eventName:
-            print(eventName)
-            newEvent = Event(name = eventName)
-            newEvent.save()
-        else:
-            newEvent = Event(name = str(date.today().strftime("%d/%m/%Y")))
-            newEvent.save()
-        r = Round(event=newEvent, order=1)
-        r.save()
-        return HttpResponseRedirect(reverse("shots:index"))
+        if Event.objects.filter(name = str(eventName)).count() != 0:
+
+            if eventName:
+                print(eventName)
+                newEvent = Event(name = eventName)
+                newEvent.save()
+            else:
+                newEvent = Event(name = str(date.today().strftime("%d/%m/%Y")))
+                newEvent.save()
+            r = Round(event=newEvent, order=1)
+            r.save()
+            return HttpResponseRedirect(reverse("shots:index"))
 
 
 def addParticipant(request):
@@ -136,10 +138,12 @@ def addParticipant(request):
     htmlResponse = ''
     try:
         if request.method == "POST":
-            nameForm = request.POST["participant-name"].strip()
-            nicknameForm = request.POST["participant-nickname"].strip()
+            nameForm = str(request.POST["participant-name"].strip()).lower().capitalize()
+            nicknameForm = str(request.POST["participant-nickname"].strip())
             typeForm = request.POST.get("participant-type", False)
             event = Event.objects.get(pk=int(request.POST["event-id"]))
+            roundIdForm = int(request.POST.get("round-id"))
+            currentNameForm = str(request.POST["current-participant-name"].strip()).lower().capitalize()
             ################
             # nameForm = request.POST.get("participant-name")
             # nicknameForm = request.POST.get("participant-nickname")
@@ -148,50 +152,45 @@ def addParticipant(request):
             print(f"nameForm: {nameForm}; nickname : {nicknameForm}; typeForm {typeForm}; eventId : {event}")
             # event = Event.objects.get(pk=int(eventId))
             ###############
-            participants = []
             rounds = event.rounds.all()
             events = Event.objects.order_by('-id')
             # end of var initial
 
-            if Participant.objects.filter(name = str(nameForm)).count() == 0:
-                p = Participant(name = str(nameForm), nickname = str(nicknameForm), type = typeForm)
-                p.save()
-                if p not in participants:
-                    participants.append(p)
+            if int(request.POST["adding-method"]) == 1:
+                if Participant.objects.filter(name = nameForm).count() == 0:
+                    p = Participant(name = nameForm, nickname = nicknameForm, type = typeForm)
+                    p.save()
 
-                htmlResponse = f"<div class='col-lg-6 col-sm-6 col-6 participant'><div class='form-group'><div class='input-group drunk'><div class='col-lg-8 col-sm-8 col-6' style='display: flex; align-items: center'><span>{p.name}</span></div><span class='input-group-btn'><button type='button' class='quantity-left-minus btn btn-number'  data-type='minus' data-field='{p.name}-quantity'><i class='fa fa-minus drunk' aria-hidden='true'></i></button></span><input type='hidden' name='participant' value='{str(p.id)}'><input type='text' id='{p.name}-quantity' name='quantity-{str(p.id)}' class='form-control input-number participant-quantity' value='0' min='0' max='100'><span class='input-group-btn'><button type='button' class='quantity-right-plus btn btn-number' data-type='plus' data-field='{p.name}-quantity'><i class='fa fa-plus drunk' aria-hidden='true'></i></button></span></div></div></div>"
+                    message['status'] = 'Success'
+                    message['message'] = f"{nameForm} is added successfully."
+                else:
+                    message['status'] = 'Error'
+                    message['message'] = f"{nameForm} exists."
+                    return JsonResponse(message, status = 400)
+                    # return JsonResponse({"nameForm": nameForm, "event":event.id, "message": message})
+            elif int(request.POST["adding-method"]) == 0:
+                if Participant.objects.filter(name = currentNameForm).count() == 1:
+                    p = Participant.objects.get(name = currentNameForm)
+                    message['status'] = 'Success'
+                    message['message'] = f"{currentNameForm} is added successfully."
+                else:
+                    message['status'] = 'Error'
+                    message['message'] = f"{currentNameForm} is not found."
+                    return JsonResponse(message, status = 400)
 
-                message['status'] = 'Success'
-                message['message'] = f"{nameForm} is added successfully."
+            if p:
+                htmlResponse = f"<div class='col-lg-6 col-sm-6 col-6 participant'><div class='form-group'><div class='input-group drunk'><div class='col-lg-5 col-sm-6 col-12' style='display: flex; align-items: center'><span class='d-inline-block text-truncate'>{p.name}</span></div><span class='input-group-btn'><button type='button' class='quantity-left-minus btn btn-number'  data-type='minus' data-field='{p.name}-quantity'><i class='fa fa-minus drunk' aria-hidden='true'></i></button></span><input type='hidden' name='participant' value='{str(p.id)}'><input type='text' id='{p.name}-quantity' name='quantity-{str(p.id)}' class='form-control input-number participant-quantity' value='0' min='0' max='100'><span class='input-group-btn'><button type='button' class='quantity-right-plus btn btn-number' data-type='plus' data-field='{p.name}-quantity'><i class='fa fa-plus drunk' aria-hidden='true'></i></button></span></div></div></div>"
+
                 message['id'] = str(p.id)
                 message['name'] = str(p.name)
                 message['htmlResponse'] = htmlResponse
-            else:
-                message['status'] = 'Error'
-                message['message'] = f"{nameForm} exists."
-                # return JsonResponse({"nameForm": nameForm, "event":event.id, "message": message})
-
-            if rounds:
-                for round in rounds:
-                    rpList = RoundParticipant.objects.filter(round=round.id)
-                    for rp in rpList:
-                        if rp.participant not in participants:
-                            participants.append(rp.participant)
-            if not participants:
-                pList = Participant.objects.filter(type = 1)
-                for p1 in pList:
-                    participants.append(p1)
-
-            roundIdForm = int(request.POST.get("round-id"))
 
             if roundIdForm != 0:
                 r = Round.objects.get(pk=roundIdForm)
                 rp = RoundParticipant(round=r, participant=p, quantity=0)
                 rp.save()
-            if message['status'] == 'Success':
-                return JsonResponse(message, status = 200)
-            else:
-                return JsonResponse(message, status = 400)
+
+            return JsonResponse(message, status = 200)
 
     except:
         message['status'] = 'Error'
@@ -402,3 +401,13 @@ def getHint(request, hint=""):
         request.session['drinker'] = generateSigner()
         return HttpResponsePermanentRedirect(reverse("shots:index"))
     return HttpResponse(hint)
+
+
+def getCurrentParticipant(request, listParticipant=[]):
+    pl = Participant.objects.exclude(type=1)
+    if pl:
+        for p in pl:
+            if str(p.name) not in listParticipant:
+                listParticipant.append(str(p.name))
+    print(listParticipant)
+    return JsonResponse({'list' :listParticipant})

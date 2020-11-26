@@ -21,5 +21,6 @@ urlpatterns = [
     # 1st page
     path('landingPage', views.landingPage, name="landingPage"),
     path('getHint/<str:hint>', views.getHint, name="get_hint"),
-    path('getHint/', views.getHint, name="get_hint_empty")
+    path('getHint/', views.getHint, name="get_hint_empty"),
+    path('getCurrentParticipant/', views.getCurrentParticipant, name="get_current_participant")
 ]

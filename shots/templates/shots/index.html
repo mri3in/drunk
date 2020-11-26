@@ -100,6 +100,10 @@
               $('#participantList').children().eq(i).after(response.htmlResponse);
               adjustQuantity();
 
+              // add the new participant to the payee
+              $('#payeeList').append($('<option>', {value: response.id, text:response.name}));
+
+              $('#Add-Participant-Form').trigger('reset');
               $('#AddParticipantModal').modal('hide');
             }
           });
@@ -138,7 +142,7 @@
         };
 
         {% autoescape off %}
-        var currentParticipant = {{currentParticipant}};
+        currentParticipant = {{currentParticipant}};
         {% endautoescape %}
 
         $('#participantAutocomplete').typeahead(
@@ -163,6 +167,8 @@
         checkFirstEvent();
 
       }); // end of document.ready
+
+      var currentParticipant = []
 
       function adjustQuantity () {
         document.querySelectorAll('.quantity-left-minus').forEach(button => {
@@ -277,6 +283,16 @@
         if ($('#eventList option').length == 0){
           $('#addEventModal').modal('show');
         }
+      }
+
+      function getCurrentParticipant(currentList) {
+        fetch("{% url 'shots:get_current_participant' %}")
+          .then(response => response.json())
+          .then(data => {
+            currentParticipant = data.list;
+            $('#participantAutocomplete').data('typeahead').source = currentParticipant;
+            // console.log(currentParticipant);
+          });
       }
     </script>
   </head>
@@ -444,7 +460,7 @@
                 <label for="participant-name" class="control-label">Name:</label>
                 <div class="clearfix"></div>
                 <div class="form-group">
-                  <input type="text" class="form-control typeahead" id="participantAutocomplete" name="current-participant-name" placeholder="Name of participant" required>
+                  <input type="text" class="form-control typeahead" id="participantAutocomplete" name="current-participant-name" placeholder="Name of participant" required >
                 </div>
               </div>
               <div class="form-group new-participant">
