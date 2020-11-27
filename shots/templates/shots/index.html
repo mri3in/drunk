@@ -20,6 +20,219 @@
     <link href="{% static 'drunk/typeahead.css' %}" rel="stylesheet">
     <link rel="icon" type="image/png" href="{% static 'assets/shot.png' %}">
     <title>Drunk</title>
+
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">
+        <img src="{% static 'assets/shot.png' %}" height="30" width="30">
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          {% if lastEvent %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'shots:dashboard' lastEvent.id %}">Balance Dashboard</a></li>
+          {% else %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'shots:dashboard_empty' %}">Balance Dashboard</a></li>
+          {% endif %}
+          <li class="nav-item active"><a class="nav-link" href="{% url 'shots:index' %}">Event Detail<span class="sr-only">(current)</span></a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="clearfix"></div>
+    <div class="wrapper">
+      <div class="col-0 col-sm-0 col-md-1 col-lg-3"></div>
+      <form class="col-12 col-sm-12 col-md-10 col-lg-6" id="form_event" action="{% url 'shots:addRound' %}" method="post">
+        {% csrf_token %}
+        <div class="d-flex justify-content-end">
+          <button type="button" class="btn btn-drunk-outline-primary" data-toggle="modal" data-target="#addEventModal">
+            <i class="fa fa-plus" aria-hidden="true"></i><span class="sm-only"> Event</span>
+          </button>
+          <select id="eventList" class="form-control" name="event">
+            {% for event in events %}
+              {% if event == lastEvent %}
+                <option value="{{ event.id }}" selected>{{ event.name }}</option>
+              {% else %}
+                <option value="{{ event.id }}">{{ event.name }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <div class="clearfix"></div>
+
+        <div class="d-flex justify-content-end">
+          <select id="roundList" class="form-control" name="round">
+            <option value=0 selected> + New Round</option>
+            {% for round in rounds %}
+              <option value="{{ round.id }}">Round {{ round.order }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="clearfix"></div>
+        <div class="form-group">
+          <label>Participant </label>
+          <div id="participantList" class="row">
+            {% for participant in participants %}
+            <div class="col-lg-6 col-sm-6 col-6 participant">
+              <div class="form-group">
+                <div class="input-group drunk">
+                  <div class="col-lg-5 col-sm-6 col-12" style="display: flex; align-items: center">
+                    <span class="d-inline-block text-truncate">{{ participant.name }}</span>
+                  </div>
+                  <span class="input-group-btn">
+                    <button type="button" class="quantity-left-minus btn btn-number"  data-type="minus" data-field="{{ participant.name }}-quantity">
+                      <i class="fa fa-minus drunk" aria-hidden="true"></i>
+                    </button>
+                  </span>
+                  <input type="hidden" name="participant" value="{{ participant.id }}">
+                  <input type="text" id="{{ participant.name }}-quantity" name="quantity-{{ participant.id }}" class="form-control input-number participant-quantity" value="0" min="0" max="100">
+                  <span class="input-group-btn">
+                    <button type="button" class="quantity-right-plus btn btn-number" data-type="plus" data-field="{{ participant.name }}-quantity">
+                      <i class="fa fa-plus drunk" aria-hidden="true"></i>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            <div class="col-lg-6 col-sm-6 col-6" id='add-participant-button'>
+              <div class="form-group" style="position: relative">
+                <button type="button" class="btn btn-drunk-outline-primary" data-toggle="modal" data-target="#AddParticipantModal">
+                  <i class="fa fa-plus" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Payee </label>
+          <select id="payeeList" class="form-control" name="payee">
+            <option selected disabled hidden value="">Please select one</option>
+            {% for participant in participants %}
+              <option value="{{ participant.id }}">{{ participant.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Total </label>
+          <div class="input-group">
+            <input id="total" type="text" class="form-control" placeholder="500" name="total" required>
+            <div class="input-group-append">
+              <span class="input-group-text">,000</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Note </label>
+          <input id="note" type="text" class="form-control" placeholder="Note" name="note">
+        </div>
+        <div class="form-group d-flex justify-content-center">
+          <button type="submit" class="btn btn-drunk-primary submit-form-event">
+            <i class="fa fa-plus-square" aria-hidden="true"></i>
+            Add A Round
+          </button>
+        </div>
+      </form>
+
+    </div>
+    <!-- Modals start here -->
+    <!-- Add Event Modal -->
+    <div class="modal fade" id="addEventModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Add New Event</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <form action="{% url 'shots:addEvent' %}" method="post">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                  <label for="event-name" class="control-label">Event:</label>
+                  <input type="text" class="form-control" id="event-name" name="event-name">
+                  <p style="font-style: italic"> Leave blank to use today as the event name.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-drunk-primary">Create Event</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- Add Participant Modal -->
+    <div class="modal fade" id="AddParticipantModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Add New Participant</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <form action="{% url 'shots:addParticipant' %}" method="post" id="Add-Participant-Form" name="Add-Participant-Form">
+            {% csrf_token %}
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="addingMethod">Adding Method</label>
+                <select class="form-control" id="addingMethod" name="adding-method">
+                  <option value="0" selected>Existing Participant</option>
+                  <option value="1">New Participant</option>
+                </select>
+              </div>
+              <div class="form-group existing-participant">
+                <label for="participant-name" class="control-label">Name:</label>
+                <div class="clearfix"></div>
+                <div class="form-group">
+                  <input type="text" class="form-control typeahead" id="participantAutocomplete" name="current-participant-name" placeholder="Name of participant" required >
+                </div>
+              </div>
+              <div class="form-group new-participant">
+                <label for="participant-name" class="control-label">Name:</label>
+                <input type="text" class="form-control" id="participant-name" name="participant-name" required>
+              </div>
+              <div class="form-group new-participant">
+                <label for="participant-nickname" class="control-label">Nickname:</label>
+                <input type="text" class="form-control" id="participant-nickname" name="participant-nickname">
+              </div>
+              <div class="form-group new-participant">
+                <label for="participant-type" class="control-label">Frequent Member?:</label>
+                <input type="checkbox" id="participant-type" name="participant-type" value="True">
+                <span>Yes</span>
+              </div>
+              <div class="form-group" hidden>
+                <input type="text" id="participant-round-id" name="round-id" value="1">
+                <input type="text" id="participant-event-id" name="event-id" value="1">
+                <input type="text" id="current-participant-id" name="current-participant-id" value="">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-drunk-primary">Add Participant</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center fixed-bottom toast-area-hidden" style="min-height: 200px;" id="toast-area">
+      <!-- Then put toasts within -->
+      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" id="toast-add-participant" data-delay="3000">
+        <div class="toast-header">
+          <svg width="20" height="20" class="rounded mr-2">
+            <rect width="20" height="20"/>
+          </svg>
+          <strong class="mr-auto">Success</strong>
+          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="toast-body">
+          Hello, world! This is a toast message.
+        </div>
+      </div>
+    </div>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         adjustQuantity();
@@ -313,217 +526,5 @@
 
 
     </script>
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">
-        <img src="{% static 'assets/shot.png' %}" height="30" width="30">
-      </a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          {% if lastEvent %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'shots:dashboard' lastEvent.id %}">Balance Dashboard</a></li>
-          {% else %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'shots:dashboard_empty' %}">Balance Dashboard</a></li>
-          {% endif %}
-          <li class="nav-item active"><a class="nav-link" href="{% url 'shots:index' %}">Event Detail<span class="sr-only">(current)</span></a></li>
-        </ul>
-      </div>
-    </nav>
-
-    <div class="clearfix"></div>
-    <div class="wrapper">
-      <div class="col-0 col-sm-0 col-md-1 col-lg-3"></div>
-      <form class="col-12 col-sm-12 col-md-10 col-lg-6" id="form_event" action="{% url 'shots:addRound' %}" method="post">
-        {% csrf_token %}
-        <div class="d-flex justify-content-end">
-          <button type="button" class="btn btn-drunk-outline-primary" data-toggle="modal" data-target="#addEventModal">
-            <i class="fa fa-plus" aria-hidden="true"></i><span class="sm-only"> Event</span>
-          </button>
-          <select id="eventList" class="form-control" name="event">
-            {% for event in events %}
-              {% if event == lastEvent %}
-                <option value="{{ event.id }}" selected>{{ event.name }}</option>
-              {% else %}
-                <option value="{{ event.id }}">{{ event.name }}</option>
-              {% endif %}
-            {% endfor %}
-          </select>
-        </div>
-        <div class="clearfix"></div>
-
-        <div class="d-flex justify-content-end">
-          <select id="roundList" class="form-control" name="round">
-            <option value=0 selected> + New Round</option>
-            {% for round in rounds %}
-              <option value="{{ round.id }}">Round {{ round.order }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="clearfix"></div>
-        <div class="form-group">
-          <label>Participant </label>
-          <div id="participantList" class="row">
-            {% for participant in participants %}
-            <div class="col-lg-6 col-sm-6 col-6 participant">
-              <div class="form-group">
-                <div class="input-group drunk">
-                  <div class="col-lg-5 col-sm-6 col-12" style="display: flex; align-items: center">
-                    <span class="d-inline-block text-truncate">{{ participant.name }}</span>
-                  </div>
-                  <span class="input-group-btn">
-                    <button type="button" class="quantity-left-minus btn btn-number"  data-type="minus" data-field="{{ participant.name }}-quantity">
-                      <i class="fa fa-minus drunk" aria-hidden="true"></i>
-                    </button>
-                  </span>
-                  <input type="hidden" name="participant" value="{{ participant.id }}">
-                  <input type="text" id="{{ participant.name }}-quantity" name="quantity-{{ participant.id }}" class="form-control input-number participant-quantity" value="0" min="0" max="100">
-                  <span class="input-group-btn">
-                    <button type="button" class="quantity-right-plus btn btn-number" data-type="plus" data-field="{{ participant.name }}-quantity">
-                      <i class="fa fa-plus drunk" aria-hidden="true"></i>
-                    </button>
-                  </span>
-                </div>
-              </div>
-            </div>
-            {% endfor %}
-            <div class="col-lg-6 col-sm-6 col-6" id='add-participant-button'>
-              <div class="form-group" style="position: relative">
-                <button type="button" class="btn btn-drunk-outline-primary" data-toggle="modal" data-target="#AddParticipantModal">
-                  <i class="fa fa-plus" aria-hidden="true"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Payee </label>
-          <select id="payeeList" class="form-control" name="payee">
-            <option selected disabled hidden value="">Please select one</option>
-            {% for participant in participants %}
-              <option value="{{ participant.id }}">{{ participant.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Total </label>
-          <div class="input-group">
-            <input id="total" type="text" class="form-control" placeholder="500" name="total" required>
-            <div class="input-group-append">
-              <span class="input-group-text">,000</span>
-            </div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Note </label>
-          <input id="note" type="text" class="form-control" placeholder="Note" name="note">
-        </div>
-        <div class="form-group d-flex justify-content-center">
-          <button type="submit" class="btn btn-drunk-primary submit-form-event">
-            <i class="fa fa-plus-square" aria-hidden="true"></i>
-            Add A Round
-          </button>
-        </div>
-      </form>
-
-    </div>
-    <!-- Modals start here -->
-    <!-- Add Event Modal -->
-    <div class="modal fade" id="addEventModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">Add New Event</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          </div>
-          <form action="{% url 'shots:addEvent' %}" method="post">
-            {% csrf_token %}
-            <div class="modal-body">
-                <div class="form-group">
-                  <label for="event-name" class="control-label">Event:</label>
-                  <input type="text" class="form-control" id="event-name" name="event-name">
-                  <p style="font-style: italic"> Leave blank to use today as the event name.</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-drunk-primary">Create Event</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-    <!-- Add Participant Modal -->
-    <div class="modal fade" id="AddParticipantModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">Add New Participant</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          </div>
-          <form action="{% url 'shots:addParticipant' %}" method="post" id="Add-Participant-Form" name="Add-Participant-Form">
-            {% csrf_token %}
-            <div class="modal-body">
-              <div class="form-group">
-                <label for="addingMethod">Adding Method</label>
-                <select class="form-control" id="addingMethod" name="adding-method">
-                  <option value="0" selected>Existing Participant</option>
-                  <option value="1">New Participant</option>
-                </select>
-              </div>
-              <div class="form-group existing-participant">
-                <label for="participant-name" class="control-label">Name:</label>
-                <div class="clearfix"></div>
-                <div class="form-group">
-                  <input type="text" class="form-control typeahead" id="participantAutocomplete" name="current-participant-name" placeholder="Name of participant" required >
-                </div>
-              </div>
-              <div class="form-group new-participant">
-                <label for="participant-name" class="control-label">Name:</label>
-                <input type="text" class="form-control" id="participant-name" name="participant-name" required>
-              </div>
-              <div class="form-group new-participant">
-                <label for="participant-nickname" class="control-label">Nickname:</label>
-                <input type="text" class="form-control" id="participant-nickname" name="participant-nickname">
-              </div>
-              <div class="form-group new-participant">
-                <label for="participant-type" class="control-label">Frequent Member?:</label>
-                <input type="checkbox" id="participant-type" name="participant-type" value="True">
-                <span>Yes</span>
-              </div>
-              <div class="form-group" hidden>
-                <input type="text" id="participant-round-id" name="round-id" value="1">
-                <input type="text" id="participant-event-id" name="event-id" value="1">
-                <input type="text" id="current-participant-id" name="current-participant-id" value="">
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-drunk-primary">Add Participant</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-    <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center fixed-bottom toast-area-hidden" style="min-height: 200px;" id="toast-area">
-      <!-- Then put toasts within -->
-      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" id="toast-add-participant" data-delay="3000">
-        <div class="toast-header">
-          <svg width="20" height="20" class="rounded mr-2">
-            <rect width="20" height="20"/>
-          </svg>
-          <strong class="mr-auto">Success</strong>
-          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="toast-body">
-          Hello, world! This is a toast message.
-        </div>
-      </div>
-    </div>
   </body>
 </html>
