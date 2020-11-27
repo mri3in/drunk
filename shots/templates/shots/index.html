@@ -146,12 +146,13 @@
             <h4 class="modal-title" id="myModalLabel">Add New Event</h4>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
-          <form action="{% url 'shots:addEvent' %}" method="post">
+          <form action="{% url 'shots:addEvent' %}" method="post" id="Add-Event-Form">
             {% csrf_token %}
             <div class="modal-body">
                 <div class="form-group">
                   <label for="event-name" class="control-label">Event:</label>
                   <input type="text" class="form-control" id="event-name" name="event-name">
+                  <p style="font-style: italic"> Event name must be unique.</p>
                   <p style="font-style: italic"> Leave blank to use today as the event name.</p>
                 </div>
             </div>
@@ -217,7 +218,7 @@
     </div>
     <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center fixed-bottom toast-area-hidden" style="min-height: 200px;" id="toast-area">
       <!-- Then put toasts within -->
-      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" id="toast-add-participant" data-delay="3000">
+      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" id="toast-alert" data-delay="3000">
         <div class="toast-header">
           <svg width="20" height="20" class="rounded mr-2">
             <rect width="20" height="20"/>
@@ -285,11 +286,11 @@
               // console.log(response);
               // create toast
               $('#toast-area').removeClass("toast-area-hidden").addClass("toast-area-show");
-              $('#toast-add-participant').children('.toast-header').children('strong').eq(0).empty().append(response.responseJSON.status).css({"color": "#721c24"});
-              $('#toast-add-participant').children('.toast-header').children('svg').eq(0).css({'fill': '#f8d7da'});
-              $('#toast-add-participant').children('.toast-body').eq(0).empty().append(response.responseJSON.message);
-              $('#toast-add-participant').toast('show');
-              $('#toast-add-participant').on('hidden.bs.toast', function (){
+              $('#toast-alert').children('.toast-header').children('strong').eq(0).empty().append(response.responseJSON.status).css({"color": "#721c24"});
+              $('#toast-alert').children('.toast-header').children('svg').eq(0).css({'fill': '#f8d7da'});
+              $('#toast-alert').children('.toast-body').eq(0).empty().append(response.responseJSON.message);
+              $('#toast-alert').toast('show');
+              $('#toast-alert').on('hidden.bs.toast', function (){
                 $('#toast-area').removeClass("toast-area-show").addClass("toast-area-hidden");
               });
 
@@ -302,11 +303,11 @@
 
               // create toast
               $('#toast-area').removeClass("toast-area-hidden").addClass("toast-area-show");
-              $('#toast-add-participant').children('.toast-header').children('strong').eq(0).empty().append(response.status).css({"color": "#155724"});
-              $('#toast-add-participant').children('.toast-header').children('svg').eq(0).css({'fill': '#d4edda'});
-              $('#toast-add-participant').children('.toast-body').eq(0).empty().append(response.message);
-              $('#toast-add-participant').toast('show');
-              $('#toast-add-participant').on('hidden.bs.toast', function (){
+              $('#toast-alert').children('.toast-header').children('strong').eq(0).empty().append(response.status).css({"color": "#155724"});
+              $('#toast-alert').children('.toast-header').children('svg').eq(0).css({'fill': '#d4edda'});
+              $('#toast-alert').children('.toast-body').eq(0).empty().append(response.message);
+              $('#toast-alert').toast('show');
+              $('#toast-alert').on('hidden.bs.toast', function (){
                 $('#toast-area').removeClass("toast-area-show").addClass("toast-area-hidden");
               });
 
@@ -344,6 +345,40 @@
             }
           });
 
+        });
+
+        $('#Add-Event-Form').submit(function (event) {
+          // Stop form from submitting normally
+          event.preventDefault();
+
+          let $form = $(this),
+            nameForm = $form.find( "input[name='event-name']" ).val(),
+            urlForm = $form.attr( "action" ),
+            csrf = $form.find("input[name='csrfmiddlewaretoken']").val();
+
+          let input = $form.serialize();
+
+          $.ajax({
+            url: urlForm,
+            data: input,
+            method: "POST",
+            dataType: "json",
+            error: function (response) {
+              // console.log(response);
+              // create toast
+              $('#toast-area').removeClass("toast-area-hidden").addClass("toast-area-show");
+              $('#toast-alert').children('.toast-header').children('strong').eq(0).empty().append(response.responseJSON.status).css({"color": "#721c24"});
+              $('#toast-alert').children('.toast-header').children('svg').eq(0).css({'fill': '#f8d7da'});
+              $('#toast-alert').children('.toast-body').eq(0).empty().append(response.responseJSON.message);
+              $('#toast-alert').toast('show');
+              $('#toast-alert').on('hidden.bs.toast', function (){
+                $('#toast-area').removeClass("toast-area-show").addClass("toast-area-hidden");
+              });
+            },
+            success: function(response) {
+
+            }
+          });
         });
 
         $('#AddParticipantModal').on('shown.bs.modal', function () {

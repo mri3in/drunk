@@ -123,18 +123,18 @@ def addRound(request):
 def addEvent(request):
     if request.method == "POST":
         eventName = request.POST["event-name"].strip()
-        if Event.objects.filter(name = str(eventName)).count() != 0:
-
-            if eventName:
-                print(eventName)
-                newEvent = Event(name = eventName)
-                newEvent.save()
-            else:
-                newEvent = Event(name = str(date.today().strftime("%d/%m/%Y")))
-                newEvent.save()
+        newEvent = None
+        if not eventName:
+            eventName = str(date.today().strftime("%d/%m/%Y"))
+        if Event.objects.filter(name = str(eventName)).count() == 0:
+            print(eventName)
+            newEvent = Event(name = eventName)
+            newEvent.save()
             r = Round(event=newEvent, order=1)
             r.save()
             return HttpResponseRedirect(reverse("shots:index"))
+        else:
+            return JsonResponse({"message": f"Fail to add {eventName}.", "status": "Error"}, status = 400)
 
 
 def addParticipant(request):
