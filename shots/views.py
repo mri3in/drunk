@@ -408,12 +408,13 @@ def landingPage(request):
 
 def getHint(request, hint=""):
     escapedHint = unescape(hint)
-    result = None
+    if escapedHint:
+        result = None
 
-    with urlopen(os.path.join(settings.STATIC_URL, 'assets/text.txt')) as f:
-        result = f.readline().decode("utf-8").rstrip()
+        with urlopen(os.path.join(settings.STATIC_URL, 'assets/text.txt')) as f:
+            result = f.readline().decode("utf-8").rstrip()
 
-    if hint == result:
-        request.session['drinker'] = generateSigner()
-        return HttpResponsePermanentRedirect(reverse("shots:index"))
-    return HttpResponse(hint)
+        if escapedHint == result:
+            request.session['drinker'] = generateSigner()
+            return HttpResponsePermanentRedirect(reverse("shots:index"))
+    return HttpResponse(escapedHint)
