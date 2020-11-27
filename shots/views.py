@@ -179,20 +179,25 @@ def addParticipant(request):
                 if Participant.objects.filter(name = currentNameForm).count() == 1:
                     p = Participant.objects.get(name = currentNameForm)
 
-                    if str(p.id) in currentParticipantId:
-                        del currentParticipantId[currentParticipantId.index(str(p.id))]
+                    if not p.type:
+                        if str(p.id) in currentParticipantId:
+                            del currentParticipantId[currentParticipantId.index(str(p.id))]
 
-                    for id in currentParticipantId:
-                        currentParticipant.append(str(Participant.objects.get(pk=int(id)).name))
+                        for id in currentParticipantId:
+                            currentParticipant.append(str(Participant.objects.get(pk=int(id)).name))
 
-                    message['status'] = 'Success'
-                    message['message'] = f"{currentNameForm} is added successfully."
-                    message['currentParticipantId'] = currentParticipantId
-                    message['currentParticipant'] = currentParticipant
+                        message['status'] = 'Success'
+                        message['message'] = f"{currentNameForm} is added successfully."
+                        message['currentParticipantId'] = currentParticipantId
+                        message['currentParticipant'] = currentParticipant
+                    else:
+                        message['status'] = 'Error'
+                        message['message'] = f"{currentNameForm} exists."
+                        return JsonResponse(message, status = 400)
 
                 else:
                     message['status'] = 'Error'
-                    message['message'] = f"{currentNameForm} is not found."
+                    message['message'] = f"Fail to add {currentNameForm}."
                     return JsonResponse(message, status = 400)
 
             if p:
