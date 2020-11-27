@@ -17,7 +17,6 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
     <script src="https://use.fontawesome.com/fea871f00c.js"></script>
     <link rel="icon" type="image/png" href="{% static 'assets/shot.png' %}">
-
     <title>Drunk</title>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
@@ -65,28 +64,27 @@
       </div>
     </nav>
     <div class="clearfix"></div>
-    <div class="row">
-      <div class="col-0 col-sm-0 col-md-1 col-lg-3"></div>
-      <div class="col-lg-6 col-sm-10 col-10">
-        <select id="event" name="event" class="form-control ml-auto mr-0" style="width:auto;">
-          {% for e in events %}
-            {% if e.id == eventId %}
-              <option value="{{e.id}}" selected>
-                {{e.name}}
-              </option>
-            {% else %}
-              <option value="{{e.id}}">
-                {{e.name}}
-              </option>
-            {% endif %}
-          {% endfor %}
-        </select>
+    <div class="row d-flex justify-content-center">
+      <div class="col-12 col-sm-12 col-md-10 col-lg-6">
+        <div class="d-flex justify-content-end">
+          <select id="event" name="event" class="form-control ml-auto mr-0" style="width:auto;">
+            {% for e in events %}
+              {% if e.id == eventId %}
+                <option value="{{e.id}}" selected>
+                  {{e.name}}
+                </option>
+              {% else %}
+                <option value="{{e.id}}">
+                  {{e.name}}
+                </option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
       </div>
     </div>
-
     <div class="clearfix"></div>
-    <div class="row">
-      <div class="col-0 col-sm-0 col-md-1 col-lg-3"></div>
+    <div class="row d-flex justify-content-center">
       <div class="col-lg-6 col-md-10 col-sm-12 col-12 table-responsive">
         <table class="table table-striped" id="dashboard-table-view">
           <thead><th>&nbsp;</th><th>Cash Out</th><th>Expense</th><th>Final</th></thead>

@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.signing import Signer
 from html import unescape
 from urllib.request import urlopen
+import math
 
 # Create your views here.
 def generateSigner():
@@ -251,9 +252,9 @@ def calculateBalance(event_id):
 
         for p in participantCost:
             if str(p) in participantExpense:
-                b = float(participantExpense[str(p)]) - float(participantCost[str(p)])
+                b = math.ceil(float(participantExpense[str(p)]) - float(participantCost[str(p)]))
             else:
-                b = 0 - float(participantCost[str(p)])
+                b = math.floor(0 - float(participantCost[str(p)]))
             participantBalance[str(p)] = b
 
         return participantQuantity, participantCost, participantExpense, participantBalance, totalCost
@@ -305,6 +306,8 @@ def dashboard_table(request, eventId=0):
     if eventId != 0:
         participantQuantity, participantCost, participantExpense, participantBalance, totalCost = calculateBalance(eventId)
 
+        totalCost = float(totalCost) * 1000
+
         for key in participantQuantity:
             p = Participant.objects.get(pk=int(key))
             participants.append(p)
@@ -317,28 +320,28 @@ def dashboard_table(request, eventId=0):
             balance = 0
 
             if str(p.id) in participantExpense:
-                expense = participantExpense[str(p.id)]
+                expense = float(participantExpense[str(p.id)]) * 1000
             if str(p.id) in participantCost:
-                cost = participantCost[str(p.id)]
+                cost = float(participantCost[str(p.id)]) * 1000
             if str(p.id) in participantBalance:
-                balance = participantBalance[str(p.id)]
+                balance = float(participantBalance[str(p.id)]) * 1000
 
             html = '<tr><td name="name">' + p.name + '</td>'
-            html += '<td name="expense">' + f'{expense:,.2f}' + '</td>'
-            html += '<td name="cost">' + f'{cost:,.2f}' + '</td>'
+            html += '<td name="expense">' + f'{expense:,.0f}' + '</td>'
+            html += '<td name="cost">' + f'{cost:,.0f}' + '</td>'
 
             if int(balance) > 0:
-                html += '<td name="balance" class="positive-balance">' + f'{balance:,.2f}' + '</td></tr>'
+                html += '<td name="balance" class="positive-balance">' + f'{balance:,.0f}' + '</td></tr>'
             elif int(balance) < 0:
-                html += '<td name="balance" class="negative-balance">' + f'{balance:,.2f}' + '</td></tr>'
+                html += '<td name="balance" class="negative-balance">' + f'{balance:,.0f}' + '</td></tr>'
             else:
-                html += '<td name="balance">' + f'{balance:,.2f}' + '</td></tr>'
+                html += '<td name="balance">' + f'{balance:,.0f}' + '</td></tr>'
 
             htmlResponse += html
 
     return JsonResponse({
         'response': htmlResponse,
-        'totalCost' : f'{totalCost:,.2f}'
+        'totalCost' : f'{totalCost:,.0f}'
     })
 
 
