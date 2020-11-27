@@ -103,8 +103,30 @@
               // add the new participant to the payee
               $('#payeeList').append($('<option>', {value: response.id, text:response.name}));
 
+              // refresh the modal
               $('#Add-Participant-Form').trigger('reset');
               $('#AddParticipantModal').modal('hide');
+              addParticipantMethod($('#addingMethod').val());
+
+              let currentParticipantUpdated = response.currentParticipant;
+
+              // change the data source of typeahead
+              $('#participantAutocomplete').typeahead('destroy','NoCached');
+              $('#participantAutocomplete').typeahead(
+                {
+                  hint: true,
+                  highlight: true,
+                  minLength: 1
+                },
+                {
+                  name: 'currentParticipantUpdated',
+                  source: substringMatcher(currentParticipantUpdated)
+                }
+              );
+              // $('#participantAutocomplete').data('typeahead').source = response.currentParticipant;
+
+              // update hidden field
+              $('#current-participant-id').val(response.currentParticipantId);
             }
           });
 
@@ -165,6 +187,10 @@
         });
 
         checkFirstEvent();
+
+        {% autoescape off %}
+        $("#current-participant-id").val({{currentParticipantId}});
+        {% endautoescape %}
 
       }); // end of document.ready
 
@@ -479,6 +505,7 @@
               <div class="form-group" hidden>
                 <input type="text" id="participant-round-id" name="round-id" value="1">
                 <input type="text" id="participant-event-id" name="event-id" value="1">
+                <input type="text" id="current-participant-id" name="current-participant-id" value="">
               </div>
             </div>
             <div class="modal-footer">

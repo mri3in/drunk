@@ -38,6 +38,7 @@ def index(request, **kwarg):
     lastEvent = None
     participants = []
     currentParticipant = []
+    currentParticipantId = []
     events = None
     rounds = None
 
@@ -65,8 +66,9 @@ def index(request, **kwarg):
                 participants.append(p)
 
     if Participant.objects.order_by('name'):
-        for p in Participant.objects.order_by('name'):
+        for p in Participant.objects.exclude(type=1).order_by('-name'):
             currentParticipant.append(str(p.name))
+            currentParticipantId.append(str(p.id))
 
     return render(request, 'shots/index.html', {
         "lastEvent": lastEvent,
@@ -74,6 +76,7 @@ def index(request, **kwarg):
         "events": events,
         "rounds": rounds,
         "currentParticipant": currentParticipant,
+        "currentParticipantId": currentParticipantId,
     })
 
 
@@ -144,35 +147,48 @@ def addParticipant(request):
             event = Event.objects.get(pk=int(request.POST["event-id"]))
             roundIdForm = int(request.POST.get("round-id"))
             currentNameForm = str(request.POST["current-participant-name"].strip()).lower().capitalize()
+            currentParticipantId = str(request.POST["current-participant-id"]).split(',')
             ################
-            # nameForm = request.POST.get("participant-name")
-            # nicknameForm = request.POST.get("participant-nickname")
-            # typeForm = request.POST.get('participant-type', False)
-            # event = request.POST.get("event-id")
-            print(f"nameForm: {nameForm}; nickname : {nicknameForm}; typeForm {typeForm}; eventId : {event}")
-            # event = Event.objects.get(pk=int(eventId))
+            print(f"nameForm: {nameForm}; nickname : {nicknameForm}; typeForm {typeForm}; event : {event}")
             ###############
             rounds = event.rounds.all()
             events = Event.objects.order_by('-id')
+            currentParticipant = []
             # end of var initial
 
-            if int(request.POST["adding-method"]) == 1:
+            if int(request.POST["adding-method"]) == 1: # add new participant
                 if Participant.objects.filter(name = nameForm).count() == 0:
                     p = Participant(name = nameForm, nickname = nicknameForm, type = typeForm)
                     p.save()
 
+                    for id in currentParticipantId:
+                        currentParticipant.append(str(Participant.objects.get(pk=int(id)).name))
+
                     message['status'] = 'Success'
                     message['message'] = f"{nameForm} is added successfully."
+                    message['currentParticipantId'] = request.POST["current-participant-id"]
+                    message['currentParticipant'] = currentParticipant
+
                 else:
                     message['status'] = 'Error'
                     message['message'] = f"{nameForm} exists."
                     return JsonResponse(message, status = 400)
-                    # return JsonResponse({"nameForm": nameForm, "event":event.id, "message": message})
-            elif int(request.POST["adding-method"]) == 0:
+
+            elif int(request.POST["adding-method"]) == 0: # add an existing participant
                 if Participant.objects.filter(name = currentNameForm).count() == 1:
                     p = Participant.objects.get(name = currentNameForm)
+                    print(currentParticipantId)
+                    if str(p.id) in currentParticipantId:
+                        del currentParticipantId[currentParticipantId.index(str(p.id))]
+
+                    for id in currentParticipantId:
+                        currentParticipant.append(str(Participant.objects.get(pk=int(id)).name))
+
                     message['status'] = 'Success'
                     message['message'] = f"{currentNameForm} is added successfully."
+                    message['currentParticipantId'] = currentParticipantId
+                    message['currentParticipant'] = currentParticipant
+
                 else:
                     message['status'] = 'Error'
                     message['message'] = f"{currentNameForm} is not found."
