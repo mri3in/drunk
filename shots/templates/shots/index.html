@@ -311,15 +311,7 @@
         }
       }
 
-      function getCurrentParticipant(currentList) {
-        fetch("{% url 'shots:get_current_participant' %}")
-          .then(response => response.json())
-          .then(data => {
-            currentParticipant = data.list;
-            $('#participantAutocomplete').data('typeahead').source = currentParticipant;
-            // console.log(currentParticipant);
-          });
-      }
+
     </script>
   </head>
   <body>

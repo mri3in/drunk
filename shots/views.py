@@ -149,7 +149,7 @@ def addParticipant(request):
             currentNameForm = str(request.POST["current-participant-name"].strip()).lower().capitalize()
             currentParticipantId = str(request.POST["current-participant-id"]).split(',')
             ################
-            print(f"nameForm: {nameForm}; nickname : {nicknameForm}; typeForm {typeForm}; event : {event}")
+            # print(f"nameForm: {nameForm}; nickname : {nicknameForm}; typeForm {typeForm}; event : {event}")
             ###############
             rounds = event.rounds.all()
             events = Event.objects.order_by('-id')
@@ -177,7 +177,7 @@ def addParticipant(request):
             elif int(request.POST["adding-method"]) == 0: # add an existing participant
                 if Participant.objects.filter(name = currentNameForm).count() == 1:
                     p = Participant.objects.get(name = currentNameForm)
-                    print(currentParticipantId)
+
                     if str(p.id) in currentParticipantId:
                         del currentParticipantId[currentParticipantId.index(str(p.id))]
 
@@ -417,13 +417,3 @@ def getHint(request, hint=""):
         request.session['drinker'] = generateSigner()
         return HttpResponsePermanentRedirect(reverse("shots:index"))
     return HttpResponse(hint)
-
-
-def getCurrentParticipant(request, listParticipant=[]):
-    pl = Participant.objects.exclude(type=1)
-    if pl:
-        for p in pl:
-            if str(p.name) not in listParticipant:
-                listParticipant.append(str(p.name))
-    print(listParticipant)
-    return JsonResponse({'list' :listParticipant})
