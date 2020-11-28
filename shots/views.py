@@ -207,7 +207,7 @@ def addParticipant(request):
 
                 else:
                     message['status'] = 'Error'
-                    message['message'] = f"Fail to add {currentNameForm}."
+                    message['message'] = f"Cannot find {currentNameForm}."
                     return JsonResponse(message, status = 400)
 
             if p:
@@ -227,6 +227,7 @@ def addParticipant(request):
     except:
         message['status'] = 'Error'
         message['message'] = f"Unexpected error: {sys.exc_info()}"
+        print(f"error: {sys.exc_info()}")
         return JsonResponse(message, status = 400)
 
 

@@ -299,7 +299,18 @@
               // console.log(response);
               let htmlResponse = $.parseHTML(response.htmlResponse);
               let i = document.getElementById('participantList').childElementCount - 2;
-              let list = document.getElementById('participantList');
+              // let list = document.getElementById('participantList');
+
+              // append the + and - function to new participant
+              if (document.getElementById('participantList').childElementCount == 1){
+                $('#participantList').children().eq(i).before(response.htmlResponse);
+              } else {
+                $('#participantList').children().eq(i).after(response.htmlResponse);
+              }
+              adjustQuantity();
+
+              // add the new participant to the payee
+              $('#payeeList').append($('<option>', {value: response.id, text:response.name}));
 
               // create toast
               $('#toast-area').removeClass("toast-area-hidden").addClass("toast-area-show");
@@ -311,16 +322,11 @@
                 $('#toast-area').removeClass("toast-area-show").addClass("toast-area-hidden");
               });
 
-              // append the + and - function to new participant
-              $('#participantList').children().eq(i).after(response.htmlResponse);
-              adjustQuantity();
-
-              // add the new participant to the payee
-              $('#payeeList').append($('<option>', {value: response.id, text:response.name}));
-
               // refresh the modal
               $('#Add-Participant-Form').trigger('reset');
               $('#AddParticipantModal').modal('hide');
+              $('#participant-event-id').val($("#eventList").val());
+              updateRoundId();
 
               let currentParticipantUpdated = response.currentParticipant;
 
