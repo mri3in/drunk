@@ -132,7 +132,7 @@ def addEvent(request):
             newEvent.save()
             r = Round(event=newEvent, order=1)
             r.save()
-            return HttpResponseRedirect(reverse("shots:index"))
+            return HttpResponsePermanentRedirect(reverse("shots:index"))
         else:
             return JsonResponse({"message": f"Fail to add {eventName}.", "status": "Error"}, status = 400)
 

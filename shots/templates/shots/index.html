@@ -2,14 +2,14 @@
 <!DOCTYPE html>
 <html lang="en" >
   <head>
-    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <!-- <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script> -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> -->
     <!-- Optional theme -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
@@ -364,26 +364,39 @@
             method: "POST",
             dataType: "json",
             error: function (response) {
-              // console.log(response);
-              // create toast
-              $('#toast-area').removeClass("toast-area-hidden").addClass("toast-area-show");
-              $('#toast-alert').children('.toast-header').children('strong').eq(0).empty().append(response.responseJSON.status).css({"color": "#721c24"});
-              $('#toast-alert').children('.toast-header').children('svg').eq(0).css({'fill': '#f8d7da'});
-              $('#toast-alert').children('.toast-body').eq(0).empty().append(response.responseJSON.message);
-              $('#toast-alert').toast('show');
-              $('#toast-alert').on('hidden.bs.toast', function (){
-                $('#toast-area').removeClass("toast-area-show").addClass("toast-area-hidden");
-              });
+              console.log("error prior if");
+              console.log(response);
+              console.log(response.url);
+              if (response.redirected) {
+                window.location.href = response.url;
+                console.log("error within if");
+                console.log(response);
+              } else {
+                // create toast
+                $('#toast-area').removeClass("toast-area-hidden").addClass("toast-area-show");
+                $('#toast-alert').children('.toast-header').children('strong').eq(0).empty().append(response.responseJSON.status).css({"color": "#721c24"});
+                $('#toast-alert').children('.toast-header').children('svg').eq(0).css({'fill': '#f8d7da'});
+                $('#toast-alert').children('.toast-body').eq(0).empty().append(response.responseJSON.message);
+                $('#toast-alert').toast('show');
+                $('#toast-alert').on('hidden.bs.toast', function (){
+                  $('#toast-area').removeClass("toast-area-show").addClass("toast-area-hidden");
+                });
+              }
+            },
+            success: function (response) {
+              console.log("success");
+              console.log(response);
+
             }
           });
         });
 
         $('#AddParticipantModal').on('shown.bs.modal', function () {
-          $('#AddParticipantModal').trigger('focus')
+          $('#Add-Participant-Form input').trigger('focus')
         });
 
         $('#addEventModal').on('shown.bs.modal', function () {
-          $('#addEventModal').trigger('focus')
+          $('#Add-Event-Form #event-name').trigger('focus')
         });
 
         // auto complete field
@@ -542,12 +555,14 @@
           $('#participantAutocomplete').attr('required', 'required');
           $('.new-participant').hide();
           $('#participant-name').removeAttr('required');
+          $('#Add-Participant-Form input').trigger('focus');
         }
         else if (method == 1){
           $('.existing-participant').hide();
           $('#participantAutocomplete').removeAttr('required');
           $('.new-participant').show();
           $('#participant-name').attr('required', 'required');
+          $('#Add-Participant-Form .new-participant input:first').trigger('focus');
         }
       }
 
