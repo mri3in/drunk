@@ -139,7 +139,7 @@
 
     <!-- Modals start here -->
     <!-- Add Event Modal -->
-    <div class="modal fade" id="addEventModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="addEventModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" >
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -321,7 +321,6 @@
               // refresh the modal
               $('#Add-Participant-Form').trigger('reset');
               $('#AddParticipantModal').modal('hide');
-              addParticipantMethod($('#addingMethod').val());
 
               let currentParticipantUpdated = response.currentParticipant;
 
@@ -410,8 +409,8 @@
           // })
         });
 
-        $('#AddParticipantModal').on('shown.bs.modal', function () {
-          $('#Add-Participant-Form input').trigger('focus')
+        $('#AddParticipantModal').on('show.bs.modal', function () {
+          addParticipantMethod($('#addingMethod').val());
         });
 
         $('#addEventModal').on('shown.bs.modal', function () {
@@ -470,7 +469,10 @@
         $("#current-participant-id").val({{currentParticipantId}});
         {% endautoescape %}
 
-      }); // end of document.ready
+      });
+      //
+      // end of document.ready
+      //
 
       var currentParticipant = []
 
@@ -574,7 +576,7 @@
           $('#participantAutocomplete').attr('required', 'required');
           $('.new-participant').hide();
           $('#participant-name').removeAttr('required');
-          $('#Add-Participant-Form input').trigger('focus');
+          $('#Add-Participant-Form .existing-participant input').trigger('focus');
         }
         else if (method == 1){
           $('.existing-participant').hide();
@@ -587,6 +589,11 @@
 
       function checkFirstEvent() {
         if ($('#eventList option').length == 0){
+          $('#addEventModal').modal({
+            backdrop: 'static',
+            keyboard: false,
+          });
+          $('#addEventModal button[data-dismiss="modal"]').hide();
           $('#addEventModal').modal('show');
         }
       }

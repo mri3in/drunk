@@ -135,8 +135,8 @@ def addEvent(request):
             print(eventName)
             newEvent = Event(name = eventName)
             newEvent.save()
-            r = Round(event=newEvent, order=1)
-            r.save()
+            # r = Round(event=newEvent, order=1)
+            # r.save()
             return HttpResponsePermanentRedirect(reverse("shots:index"))
         else:
             return JsonResponse({"message": f"Fail to add {eventName}.", "status": "Error"}, status = 400)
@@ -160,6 +160,7 @@ def addParticipant(request):
             rounds = event.rounds.all()
             events = Event.objects.order_by('-id')
             currentParticipant = []
+            p = None
             # end of var initial
 
             if int(request.POST["adding-method"]) == 1: # add new participant
@@ -187,6 +188,10 @@ def addParticipant(request):
                     if not p.type:
                         if str(p.id) in currentParticipantId:
                             del currentParticipantId[currentParticipantId.index(str(p.id))]
+                        else:
+                            message['status'] = 'Error'
+                            message['message'] = f"Fail to add {currentNameForm}."
+                            return JsonResponse(message, status = 400)
 
                         for id in currentParticipantId:
                             currentParticipant.append(str(Participant.objects.get(pk=int(id)).name))
