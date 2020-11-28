@@ -364,29 +364,19 @@
             method: "POST",
             dataType: "json",
             error: function (response) {
-              console.log("error prior if");
-              console.log(response);
-              console.log(response.url);
-              if (response.redirected) {
-                window.location.href = response.url;
-                console.log("error within if");
-                console.log(response);
-              } else {
-                // create toast
-                $('#toast-area').removeClass("toast-area-hidden").addClass("toast-area-show");
-                $('#toast-alert').children('.toast-header').children('strong').eq(0).empty().append(response.responseJSON.status).css({"color": "#721c24"});
-                $('#toast-alert').children('.toast-header').children('svg').eq(0).css({'fill': '#f8d7da'});
-                $('#toast-alert').children('.toast-body').eq(0).empty().append(response.responseJSON.message);
-                $('#toast-alert').toast('show');
-                $('#toast-alert').on('hidden.bs.toast', function (){
-                  $('#toast-area').removeClass("toast-area-show").addClass("toast-area-hidden");
-                });
-              }
+              // create toast
+              $('#toast-area').removeClass("toast-area-hidden").addClass("toast-area-show");
+              $('#toast-alert').children('.toast-header').children('strong').eq(0).empty().append(response.responseJSON.status).css({"color": "#721c24"});
+              $('#toast-alert').children('.toast-header').children('svg').eq(0).css({'fill': '#f8d7da'});
+              $('#toast-alert').children('.toast-body').eq(0).empty().append(response.responseJSON.message);
+              $('#toast-alert').toast('show');
+              $('#toast-alert').on('hidden.bs.toast', function (){
+                $('#toast-area').removeClass("toast-area-show").addClass("toast-area-hidden");
+              });
             },
             success: function (response) {
               console.log("success");
               console.log(response);
-
             }
           });
         });
