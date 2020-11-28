@@ -108,7 +108,7 @@
         </div>
         <div class="form-group">
           <label>Payee </label>
-          <select id="payeeList" class="form-control" name="payee">
+          <select id="payeeList" class="form-control" name="payee" required>
             <option selected disabled hidden value="">Please select one</option>
             {% for participant in participants %}
               <option value="{{ participant.id }}">{{ participant.name }}</option>
@@ -118,14 +118,14 @@
         <div class="form-group">
           <label>Total </label>
           <div class="input-group">
-            <input id="total" type="text" class="form-control" placeholder="500" name="total" required>
+            <input id="total" type="number" class="form-control" placeholder="500" name="total" required min="1">
             <div class="input-group-append">
               <span class="input-group-text">,000</span>
             </div>
           </div>
         </div>
         <div class="form-group">
-          <label>Note </label>
+          <label>Note </label><span style="font-style: italic"> (optional)</span>
           <input id="note" type="text" class="form-control" placeholder="Note" name="note">
         </div>
         <div class="form-group d-flex justify-content-center">
@@ -152,8 +152,8 @@
                 <div class="form-group">
                   <label for="event-name" class="control-label">Event:</label>
                   <input type="text" class="form-control" id="event-name" name="event-name">
-                  <p style="font-style: italic"> Event name must be unique.</p>
-                  <p style="font-style: italic"> Leave blank to use today as the event name.</p>
+                  <small class="form-text text-muted"> Event name must be unique.</small>
+                  <small class="form-text text-muted"> Leave blank to use today as the event name.</small>
                 </div>
             </div>
             <div class="modal-footer">
@@ -177,10 +177,27 @@
             <div class="modal-body">
               <div class="form-group">
                 <label for="addingMethod">Adding Method</label>
-                <select class="form-control" id="addingMethod" name="adding-method">
+                <br>
+                <!-- <select class="form-control" id="addingMethod" name="adding-method">
                   <option value="0" selected>Existing Participant</option>
                   <option value="1">New Participant</option>
-                </select>
+                </select> -->
+                <!-- <div class="custom-control custom-radio custom-control-inline" id="addingMethod" style="color: #212529">
+                  <input type="radio" id="existing-participant" name="adding-method" class="custom-control-input" val="0">
+                  <label class="custom-control-label" for="existing-participant">Existing Participant</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline" style="color: #212529">
+                  <input type="radio" id="new-participant" name="adding-method" class="custom-control-input" val="1">
+                  <label class="custom-control-label" for="new-participant">New Participant</label>
+                </div> -->
+                <div class="form-check form-check-inline" style="color: #212529">
+                  <input class="form-check-input" type="radio" name="adding-method" id="existing-participant-radio" value="0" checked>
+                  <label class="form-check-label" for="existing-participant-radio">Existing Participant</label>
+                </div>
+                <div class="form-check form-check-inline" style="color: #212529">
+                  <input class="form-check-input" type="radio" name="adding-method" id="new-participant-radio" value="1">
+                  <label class="form-check-label" for="new-participant-radio">New Participant</label>
+                </div>
               </div>
               <div class="form-group existing-participant">
                 <label for="participant-name" class="control-label">Name:</label>
@@ -416,7 +433,11 @@
         });
 
         $('#AddParticipantModal').on('show.bs.modal', function () {
-          addParticipantMethod($('#addingMethod').val());
+          addParticipantMethod();
+        });
+
+        $('#AddParticipantModal').on('shown.bs.modal', function () {
+          addParticipantMethod();
         });
 
         $('#addEventModal').on('shown.bs.modal', function () {
@@ -463,10 +484,8 @@
         );
         // end of auto complete field
 
-        addParticipantMethod($('#addingMethod').val());
-
-        $('#addingMethod').change(function () {
-          addParticipantMethod($(this).val());
+        $('input[type="radio"][name="adding-method"]').change(function () {
+          addParticipantMethod();
         });
 
         checkFirstEvent();
@@ -576,15 +595,15 @@
         };
       };
 
-      function addParticipantMethod (method) {
-        if (method == 0){ // existing participant
+      function addParticipantMethod () {
+        if ($('#existing-participant-radio').is(':checked')) { // existing participant
           $('.existing-participant').show();
           $('#participantAutocomplete').attr('required', 'required');
           $('.new-participant').hide();
           $('#participant-name').removeAttr('required');
           $('#Add-Participant-Form .existing-participant input').trigger('focus');
         }
-        else if (method == 1){
+        else if ($('#new-participant-radio').is(':checked')) {
           $('.existing-participant').hide();
           $('#participantAutocomplete').removeAttr('required');
           $('.new-participant').show();
