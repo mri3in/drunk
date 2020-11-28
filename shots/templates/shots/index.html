@@ -364,21 +364,50 @@
             method: "POST",
             dataType: "json",
             error: function (response) {
-              // create toast
-              $('#toast-area').removeClass("toast-area-hidden").addClass("toast-area-show");
-              $('#toast-alert').children('.toast-header').children('strong').eq(0).empty().append(response.responseJSON.status).css({"color": "#721c24"});
-              $('#toast-alert').children('.toast-header').children('svg').eq(0).css({'fill': '#f8d7da'});
-              $('#toast-alert').children('.toast-body').eq(0).empty().append(response.responseJSON.message);
-              $('#toast-alert').toast('show');
-              $('#toast-alert').on('hidden.bs.toast', function (){
-                $('#toast-area').removeClass("toast-area-show").addClass("toast-area-hidden");
-              });
+              if (response.status == 200) {
+                document.open();
+                document.write(response.responseText);
+                document.close()
+              }
+              else {
+                // create toast
+                $('#toast-area').removeClass("toast-area-hidden").addClass("toast-area-show");
+                $('#toast-alert').children('.toast-header').children('strong').eq(0).empty().append(response.responseJSON.status).css({"color": "#721c24"});
+                $('#toast-alert').children('.toast-header').children('svg').eq(0).css({'fill': '#f8d7da'});
+                $('#toast-alert').children('.toast-body').eq(0).empty().append(response.responseJSON.message);
+                $('#toast-alert').toast('show');
+                $('#toast-alert').on('hidden.bs.toast', function (){
+                  $('#toast-area').removeClass("toast-area-show").addClass("toast-area-hidden");
+                });
+              }
             },
             success: function (response) {
               console.log("success");
               console.log(response);
             }
           });
+
+          // let formData = new FormData();
+          //
+          // formData.append("event-name", nameForm);
+          // formData.append("csrfmiddlewaretoken", csrf);
+          //
+          // fetch(urlForm, {
+          //   method : 'POST',
+          //   credentials: "same-origin",
+          //   headers: {
+          //     "X-CSRFToken": csrf,
+          //     "Accept": "application/json",
+          //     // 'Content-Type': 'application/json',
+          //     'Content-Type': 'multipart/form-data',
+          //   },
+          //   // body : JSON.stringify({'event-name': nameForm, 'csrfmiddlewaretoken' : csrf}),
+          //   body : formData,
+          //   redirect : 'follow',
+          // })
+          // .then(response => {
+          //   console.log(response);
+          // })
         });
 
         $('#AddParticipantModal').on('shown.bs.modal', function () {

@@ -10,6 +10,7 @@ from django.core.signing import Signer
 from html import unescape
 from urllib.request import urlopen
 import math
+import json
 
 # Create your views here.
 def generateSigner():
@@ -122,6 +123,10 @@ def addRound(request):
 
 def addEvent(request):
     if request.method == "POST":
+        # print(json.load(request))
+        print("====")
+        print(request.POST)
+        print("---------")
         eventName = request.POST["event-name"].strip()
         newEvent = None
         if not eventName:
